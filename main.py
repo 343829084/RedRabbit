@@ -66,5 +66,5 @@ def my_session_enter(session_id, from_scene, extra_data):
     ffext.broadcast_msg_session(1, '<font color="#ff0000">当前在线:</font>')
     ffext.broadcast_msg_session(1, ffext.singleton(player_mgr_t).idlist())
 
-print("loading.......")
+print("main.py loading.......")
 
