@@ -61,7 +61,7 @@ public:
         Py_Finalize();
         return 0;
     }
-    int reload(const string& name_)
+    string reload(const string& name_)
     {
         LOGTRACE((FFSCENE_PYTHON, "ffscene_python_t::reload begin name_[%s]", name_));
         try
@@ -71,10 +71,10 @@ public:
         catch(exception& e_)
         {
             LOGERROR((FFSCENE_PYTHON, "ffscene_python_t::reload exeception=%s", e_.what()));
-            return -1;
+            return e_.what();
         }
         LOGTRACE((FFSCENE_PYTHON, "ffscene_python_t::reload end ok name_[%s]", name_));
-        return 0;
+        return "";
     }
     //! 判断某个service是否存在
     bool is_exist(const string& service_name_)
