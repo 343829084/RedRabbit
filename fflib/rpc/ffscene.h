@@ -63,6 +63,7 @@ public:
     //! 切换scene
     int change_session_scene(const string& session_id_, const string& to_scene_, const string& extra_data);
 
+    ffrpc_t& get_rpc() { return *m_ffrpc; }
 private:
     //! 处理client 上线
     int process_session_verify(ffreq_t<session_verify_t::in_t, session_verify_t::out_t>& req_);

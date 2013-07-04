@@ -56,7 +56,12 @@ int ffrpc_t::open(const string& opt_)
     LOGTRACE((FFRPC, "ffrpc_t::open end ok m_node_id[%u]", m_node_id));
     return 0;
 }
-
+int ffrpc_t::close()
+{
+    m_tq.close();
+    m_thread.join();
+    return 0;
+}
 //! 连接到broker master
 socket_ptr_t ffrpc_t::connect_to_broker(const string& host_, uint32_t node_id_)
 {

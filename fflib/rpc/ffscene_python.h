@@ -8,6 +8,7 @@ using namespace std;
 #include "rpc/ffscene.h"
 #include "python/ffpython.h"
 #include "base/log.h"
+#include "rpc/db_mgr.h"
 
 namespace ff
 {
@@ -19,6 +20,7 @@ namespace ff
 #define OFFLINE_CB_NAME     "ff_session_offline"
 #define LOGIC_CB_NAME       "ff_session_logic"
 #define TIMER_CB_NAME       "ff_timer_callback"
+#define DB_QUERY_CB_NAME    "db_query_callback"
 
 class ffscene_python_t: public ffscene_t
 {
@@ -54,6 +56,8 @@ public:
         }
         m_ffpython.load("main");
         int ret = ffscene_t::open(arg_helper);
+        
+        m_db_mgr.start();
         LOGTRACE((FFSCENE_PYTHON, "ffscene_python_t::open end ok"));
         return ret;
     }
@@ -61,6 +65,7 @@ public:
     {
         ffscene_t::close();
         Py_Finalize();
+        m_db_mgr.stop();
         return 0;
     }
     string reload(const string& name_)
@@ -238,17 +243,56 @@ public:
         return 0;
     }
     
+    ffslot_t::callback_t* gen_db_query_callback(long callback_id_)
+    {
+        struct lambda_cb: public ffslot_t::callback_t
+        {
+            lambda_cb(ffscene_python_t* p, long callback_id_):ffscene(p), callback_id(callback_id_){}
+            virtual void exe(ffslot_t::callback_arg_t* args_)
+            {
+                if (args_->type() != TYPEID(db_mgr_t::db_query_result_t))
+                {
+                    return;
+                }
+                db_mgr_t::db_query_result_t* data = (db_mgr_t::db_query_result_t*)args_;
+
+                ffscene->get_rpc().get_tq().produce(task_binder_t::gen(&lambda_cb::call_python, ffscene, callback_id,
+                                                                       data->ok, data->result_data, data->col_names));
+            }
+            static void call_python(ffscene_python_t* ffscene, long callback_id_,
+                                    bool ok, const vector<vector<string> >& ret_, const vector<string>& col_)
+            {
+                static string func_name   = DB_QUERY_CB_NAME;
+                try
+                {
+                    ffscene->m_ffpython.call<void>(ffscene->m_ext_name, func_name,
+                                                   callback_id_, ok, ret_, col_);
+                }
+                catch(exception& e_)
+                {
+                    LOGERROR((FFSCENE_PYTHON, "ffscene_python_t::gen_db_query_callback exception<%s>", e_.what()));
+                }
+            }
+            virtual ffslot_t::callback_t* fork() { return new lambda_cb(ffscene, callback_id); }
+            ffscene_python_t* ffscene;
+            long              callback_id;
+        };
+        return new lambda_cb(this, callback_id_);
+    }
+    
     //! 创建数据库连接
     long connect_db(const string& host_)
     {
-        return 0;
+        return m_db_mgr.connect_db(host_);
     }
     void db_query(long db_id_,const string& sql_, long callback_id_)
     {
+        m_db_mgr.db_query(db_id_, sql_, gen_db_query_callback(callback_id_));
     }
 public:
     ffpython_t      m_ffpython;
     string          m_ext_name;
+    db_mgr_t        m_db_mgr;
 };
 
 }
