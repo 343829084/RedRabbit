@@ -36,7 +36,9 @@ public:
                   .reg(&ffscene_python_t::change_session_scene, "change_session_scene")
                   .reg(&ffscene_python_t::once_timer, "once_timer")
                   .reg(&ffscene_python_t::reload, "reload")
-                  .reg(&ffscene_python_t::is_exist, "is_exist");
+                  .reg(&ffscene_python_t::is_exist, "is_exist")
+                  .reg(&ffscene_python_t::connect_db, "connect_db")
+                  .reg(&ffscene_python_t::db_query, "db_query");
     
         m_ffpython.init("ff");
         m_ffpython.set_global_var("ff", "ffscene_obj", (ffscene_python_t*)this);
@@ -236,7 +238,14 @@ public:
         return 0;
     }
     
-
+    //! 创建数据库连接
+    long connect_db(const string& host_)
+    {
+        return 0;
+    }
+    void db_query(const string& sql_, long callback_id_)
+    {
+    }
 public:
     ffpython_t      m_ffpython;
     string          m_ext_name;

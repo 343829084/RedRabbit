@@ -109,7 +109,8 @@ def close_session(session_id):
     return ffext.ffscene_obj.close_session(session_id)
 
 def reload(name_):
-    return ffext.ffscene_obj.reload(name_)
+    if name_ != 'ffext':
+        return ffext.ffscene_obj.reload(name_)
 
 singleton_register_dict = {}
 def singleton(type_):
