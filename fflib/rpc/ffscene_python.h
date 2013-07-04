@@ -243,7 +243,7 @@ public:
     {
         return 0;
     }
-    void db_query(const string& sql_, long callback_id_)
+    void db_query(long db_id_,const string& sql_, long callback_id_)
     {
     }
 public:

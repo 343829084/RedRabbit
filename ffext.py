@@ -127,3 +127,32 @@ def singleton(type_):
         return obj
 
 
+#数据库连接相关接口
+DB_CALLBACK_ID = 0
+DB_CALLBACK_DICT = {}
+class ffdb_t(object):
+    def __init__(self, host, id):
+        self.host   = host
+        self.db_id  = id
+    def host(self):
+        return self.host
+    def query(self, sql_, callback_ = None):
+        global DB_CALLBACK_DICT, DB_CALLBACK_ID
+        DB_CALLBACK_ID += 1
+        DB_CALLBACK_DICT[DB_CALLBACK_ID] = callback_
+        ffext.ffscene_obj.db_query(self.db_id, sql_, DB_CALLBACK_ID)
+
+#C++ 异步执行完毕db操作回调
+def db_callback(result_, callback_id_):
+    global DB_CALLBACK_DICT
+    cb = DB_CALLBACK_DICT.get(callback_id_)
+    del DB_CALLBACK_DICT[callback_id_]
+    cb(result_)
+
+
+def ffdb_create(host_):
+    db_id = ffext.ffscene_obj.connect_db(host_)
+    if db_id == 0:
+        return None
+    return ffdb_t(host_, db_id)
+
