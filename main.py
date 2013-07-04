@@ -14,7 +14,7 @@ class player_mgr_t(object):
     def remove(self, session_id_):
         del  self.all_players[session_id_]
     def add(self, session_id_, player):
-	self.all_players[session_id_] = player
+        self.all_players[session_id_] = player
     def size(self):
         return len(self.all_players)
     def idlist(self):
@@ -73,4 +73,4 @@ def my_session_enter(session_id, from_scene, extra_data):
     ffext.broadcast_msg_session(1, '<font color="#ff0000">当前在线:</font>')
     ffext.broadcast_msg_session(1, ffext.singleton(player_mgr_t).idlist())
 
-print("loading.......")																																				
+print("loading.......")																																						

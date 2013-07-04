@@ -15,7 +15,7 @@ ARCH=
 BIN=app_redrabbit
 
 #源文件目录
-SrcDir= . ../../fflib/base ../../fflib/net ../../fflib/rpc
+SrcDir= . ../../fflib/base ../../fflib/net ../../fflib/rpc ../../fflib/db
 #头文件目录
 IncDir=  ../../fflib/  /usr/include/python2.7/ /usr/include/python2.6/
 #连接库目录
@@ -33,7 +33,8 @@ OBJS = $(SRCS:%.cpp=%.o)
 
 all:$(BIN)
 $(BIN):$(OBJS)
-	g++ -o $(BIN) $(OBJS)  $(LDFLAGS) 
+	gcc -c ../../fflib/db/sqlite3.c -o sqlite3.o
+	g++ -o $(BIN) $(OBJS) sqlite3.o $(LDFLAGS)  
 	@echo -e " OK!\tCompile $@ "
 # @$(LN) $(shell pwd)/$(LIB_NAME).$(LIB_VER) /lib/$(LIB_NAME)
 

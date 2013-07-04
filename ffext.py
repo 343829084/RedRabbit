@@ -143,7 +143,7 @@ class ffdb_t(object):
         ffext.ffscene_obj.db_query(self.db_id, sql_, DB_CALLBACK_ID)
 
 #C++ 异步执行完毕db操作回调
-def db_callback(result_, callback_id_):
+def db_query_callback(callback_id_, flag_, result_, col_):
     global DB_CALLBACK_DICT
     cb = DB_CALLBACK_DICT.get(callback_id_)
     del DB_CALLBACK_DICT[callback_id_]
