@@ -18,7 +18,7 @@ namespace ff
 class mysql_ops_t : public db_ops_i
 {
     static mutex_t g_mutex;
-};
+
 public:
     mysql_ops_t();
     virtual ~mysql_ops_t();
