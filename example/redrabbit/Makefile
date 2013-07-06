@@ -4,7 +4,7 @@ CP=/bin/cp
 RM=-/bin/rm -rf
 LN=/bin/ln -s 
 CFLAGS=-g  -Wall
-LDFLAGS= -lpthread  -ldl -lpython2.7
+LDFLAGS= -lpthread  -ldl -lpython2.6 -lmysqlclient
 #链接库名
 LIB_NAME=
 #链接库版本
@@ -19,7 +19,7 @@ SrcDir= . ../../fflib/base ../../fflib/net ../../fflib/rpc ../../fflib/db
 #头文件目录
 IncDir=  ../../fflib/  /usr/include/python2.7/ /usr/include/python2.6/
 #连接库目录
-LibDir= /usr/local/lib 
+LibDir= /usr/local/lib /usr/lib/mysql
 SRCS=$(foreach dir,$(SrcDir),$(wildcard $(dir)/*.cpp))
 #INCS=$(foreach dir,$(IncDir),$(wildcard $(dir)/*.h))
 INCS=$(foreach dir,$(IncDir),$(addprefix -I,$(dir)))

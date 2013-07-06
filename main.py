@@ -84,3 +84,14 @@ def sqlite_test():
     def cb(ret):
         print(ret.flag, ret.result, ret.column, ffext.DB_CALLBACK_DICT)
     db.query('select * from dumy', cb)#cb 为异步回调函数
+    ffext.reload('main')#重载此脚本
+
+def mysql_test():
+    db = ffext.ffdb_create('mysql://localhost:3306/root/root/fftest')
+    db.query('CREATE TABLE  IF NOT EXISTS dumy (A int, c float, b varchar(200), primary key (A))')
+    db.query('insert into dumy values(1, 2.3, "ttttTTccc")')
+    def cb(ret):
+        print(ret.flag, ret.result, ret.column, ffext.DB_CALLBACK_DICT)
+    db.query('select * from dumy', cb)#cb 为异步回调函数
+    ffext.reload('main')#重载此脚本
+
