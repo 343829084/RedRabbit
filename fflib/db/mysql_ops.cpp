@@ -81,9 +81,9 @@ bool mysql_ops_t::is_connected()
 int  mysql_ops_t::exe_sql(const string& sql_, db_each_row_callback_i* cb_)
 {
     clear_env();
-    if (::mysql_query(&m_mysql, sql.c_str()))
+    if (::mysql_query(&m_mysql, sql_.c_str()))
     {
-        m_error = ::mysql_errno(&m_mysql)
+        m_error = ::mysql_errno(&m_mysql);
         return -1;
     }
     m_affect_rows_num = (int)::mysql_affected_rows(&m_mysql);
@@ -102,7 +102,7 @@ int  mysql_ops_t::exe_sql(const string& sql_, db_each_row_callback_i* cb_)
         for (int i= 0; i < num_row; ++i)
         {
             MYSQL_ROW row = ::mysql_fetch_row(res);
-            cb_->callback(column_num, row, column_infos, mysql_fetch_lengths(res));
+            cb_->callback(column_num, row, (char**)column_infos, mysql_fetch_lengths(res));
         }
         ::mysql_free_result(res);
         res = NULL;
