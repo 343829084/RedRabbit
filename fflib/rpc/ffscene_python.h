@@ -41,6 +41,7 @@ public:
                   .reg(&ffscene_python_t::is_exist, "is_exist")
                   .reg(&ffscene_python_t::connect_db, "connect_db")
                   .reg(&ffscene_python_t::db_query, "db_query");
+        m_ffpython.reg(&ffdb_t::escape, "escape");
     
         m_ffpython.init("ff");
         m_ffpython.set_global_var("ff", "ffscene_obj", (ffscene_python_t*)this);

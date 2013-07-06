@@ -2,6 +2,8 @@
 #include "rpc/db_mgr.h"
 using namespace ff;
 
+#define DB_MGR "DB_MGR"
+
 db_mgr_t::db_mgr_t():
     m_db_index(0)
 {
@@ -73,6 +75,10 @@ void db_mgr_t::db_query_impl(db_connection_info_t* db_connection_info_, const st
     if (0 == db_connection_info_->db->exe_sql(sql_, db_connection_info_->ret.result_data, db_connection_info_->ret.col_names))
     {
         db_connection_info_->ret.ok = true;
+    }
+    else
+    {
+        LOGERROR((DB_MGR, "db_mgr_t::db_query failed<%s>, while sql<%s>", db_connection_info_->db->error_msg(), sql_));
     }
     callback_->exe(&(db_connection_info_->ret));
     delete callback_;

@@ -36,8 +36,7 @@ public:
     virtual const char*  error_msg();
 
     void inc_affect_row_num()  { ++ m_affect_rows_num; }
-    
-    virtual string escape(const string& src_);
+
     
     virtual void begin_transaction();
     virtual void commit_transaction();

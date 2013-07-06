@@ -25,7 +25,7 @@ public:
     virtual void close() = 0;
     virtual int  affect_rows() = 0;
     virtual const char*  error_msg() = 0;
-    virtual string escape(const string& src_) = 0;
+
     virtual int  ping()                 = 0;
     virtual void begin_transaction()    = 0;
     virtual void commit_transaction()   = 0;
