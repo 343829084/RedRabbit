@@ -103,7 +103,7 @@ int  mysql_ops_t::exe_sql(const string& sql_, db_each_row_callback_i* cb_)
         {
             MYSQL_ROW row = ::mysql_fetch_row(res);
             unsigned long* plen = ::mysql_fetch_lengths(res);
-            cb_->callback(column_num, row, (char**)column_infos, (long*)len);
+            cb_->callback(column_num, row, (char**)column_infos, (long*)plen);
         }
         ::mysql_free_result(res);
         res = NULL;
