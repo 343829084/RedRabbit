@@ -37,6 +37,7 @@ long db_mgr_t::connect_db(const string& host_)
     shared_ptr_t<ffdb_t> db(new ffdb_t());
     if (db->connect(host_))
     {
+        LOGERROR((DB_MGR, "db_mgr_t::connect_db failed<%s>", db->error_msg()));
         return 0;
     }
     long db_id = long(db.get());

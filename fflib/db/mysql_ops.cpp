@@ -1,9 +1,9 @@
 
-
 #include "db/mysql_ops.h"
 #include "base/strtool.h"
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 using namespace ff;
 
@@ -31,17 +31,12 @@ int mysql_ops_t::connect(const string& args_)
     close();
     m_connected = false;
 
-    if(!mysql_init(&m_mysql))
-    {
-        m_error = mysql_error(&m_mysql);
-        return -1;
-    }
     m_host_arg = args_;
     vector<string> str_vt;
     strtool_t::split(m_host_arg, str_vt, "/");//! 127.0.0.1:3306/user/passwd/db
-    
+
     //! set mysql connection charset as utf8
-    if (str_vt.empty() < 3)
+    if (str_vt.size() < 3)
     {
         return -1;
     }
@@ -60,8 +55,14 @@ int mysql_ops_t::connect(const string& args_)
     {
         db = str_vt[3];
     }
+    
+    if(!mysql_init(&m_mysql))
+    {
+        m_error = mysql_error(&m_mysql);
+        return -1;
+    }
     ::mysql_options(&m_mysql, MYSQL_SET_CHARSET_NAME, "utf8");
-    if (::mysql_real_connect(&m_mysql, host.c_str(), user.c_str(), passwd.c_str(), db.c_str(), atoi(port.c_str()), NULL, 0))
+    if (!::mysql_real_connect(&m_mysql, host.c_str(), user.c_str(), passwd.c_str(), db.c_str(), atoi(port.c_str()), NULL, 0))
     {
         m_error = mysql_error(&m_mysql);
         return -1;
@@ -81,10 +82,24 @@ bool mysql_ops_t::is_connected()
 int  mysql_ops_t::exe_sql(const string& sql_, db_each_row_callback_i* cb_)
 {
     clear_env();
+
     if (::mysql_query(&m_mysql, sql_.c_str()))
     {
-        m_error = ::mysql_errno(&m_mysql);
-        return -1;
+        bool err = true;
+        if(CR_SERVER_GONE_ERROR == mysql_errno(&m_mysql) || CR_SERVER_LOST == mysql_errno(&m_mysql))
+        {
+            //! reconnect and try it again
+            ping();
+            if (0 == ::mysql_query(&m_mysql, sql_.c_str()))
+            {
+                err = false;
+            }
+        }
+        if (err)
+        {
+            m_error = ::mysql_error(&m_mysql);
+            return -1;
+        }
     }
     m_affect_rows_num = (int)::mysql_affected_rows(&m_mysql);
     
@@ -93,11 +108,11 @@ int  mysql_ops_t::exe_sql(const string& sql_, db_each_row_callback_i* cb_)
         return 0;
     }
     MYSQL_RES* res = ::mysql_store_result(&m_mysql);
-    MYSQL_FIELD* column_infos = ::mysql_fetch_fields(res);
     
-    int column_num = ::mysql_num_fields(res);
     if (res)
     {
+        MYSQL_FIELD* column_infos = ::mysql_fetch_fields(res);
+        int column_num = ::mysql_num_fields(res);
         int num_row = ::mysql_num_rows(res);
         for (int i= 0; i < num_row; ++i)
         {
