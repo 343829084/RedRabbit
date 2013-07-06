@@ -111,11 +111,10 @@ int  mysql_ops_t::exe_sql(const string& sql_, db_each_row_callback_i* cb_)
 }
 void mysql_ops_t::close()
 {
-    if (m_mysql)
+    if (m_connected)
     {
         mysql_close(&m_mysql);
         m_connected = false;
-        m_mysql = NULL;
     }
 }
 const char*  mysql_ops_t::error_msg()
@@ -144,6 +143,6 @@ void mysql_ops_t::rollback_transaction()
 
 int mysql_ops_t::ping()
 {
-    return ::mysql_ping(m_mysql);
+    return ::mysql_ping(&m_mysql);
 }
 
