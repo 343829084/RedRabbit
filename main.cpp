@@ -13,13 +13,13 @@
 #include "base/daemon_tool.h"
 
 using namespace ff;
-//./example/redrabbit/app_redrabbit -gate gate@0 -broker tcp://127.0.0.1:10241 -gate_listen tcp://121.199.21.238:10242 -python_path ./ -scene scene@0
+//./app_redrabbit -gate gate@0 -broker tcp://127.0.0.1:10241 -gate_listen tcp://121.199.21.238:10242 -python_path ./ -scene scene@0
 
 int main(int argc, char* argv[])
 {
     if (argc == 1)
     {
-        printf("./example/redrabbit/app_redrabbit -gate gate@0 -broker tcp://127.0.0.1:10241 -gate_listen tcp://*:10242 -python_path ./ -scene scene@0\n");
+        printf("./app_redrabbit -gate gate@0 -broker tcp://127.0.0.1:10241 -gate_listen tcp://*:10242 -python_path ./ -scene scene@0\n");
         return 0;
     }
     arg_helper_t arg_helper(argc, argv);
