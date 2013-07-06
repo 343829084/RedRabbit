@@ -41,6 +41,7 @@ def process_chat(session_id, msg):
 
     ret = '<font color="#008000">[%s %s]:</font>%s'%(session_id, GetNowTime(), content)
     ffext.broadcast_msg_session(1, ret)
+    
 
 
 #这个修饰器的意思是注册下面函数处理验证client账号密码，
@@ -73,4 +74,13 @@ def my_session_enter(session_id, from_scene, extra_data):
     ffext.broadcast_msg_session(1, '<font color="#ff0000">当前在线:</font>')
     ffext.broadcast_msg_session(1, ffext.singleton(player_mgr_t).idlist())
 
-print("loading.......")																																						
+print("loading.......")
+
+#数据库操作示例
+def sqlite_test():
+    db = ffext.ffdb_create('sqlite://./test.db')
+    db.query('CREATE TABLE  IF NOT EXISTS dumy (A int, c float, b varchar(200), primary key (A))')
+    db.query('insert into dumy values(1, 2.3, "ttttTTccc")')
+    def cb(ret):
+        print(ret.flag, ret.result, ret.column, ffext.DB_CALLBACK_DICT)
+    db.query('select * from dumy', cb)#cb 为异步回调函数

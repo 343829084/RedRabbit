@@ -141,18 +141,34 @@ class ffdb_t(object):
         DB_CALLBACK_ID += 1
         DB_CALLBACK_DICT[DB_CALLBACK_ID] = callback_
         ffext.ffscene_obj.db_query(self.db_id, sql_, DB_CALLBACK_ID)
+#封装query返回的结果
+class query_result_t(object):
+    flag   = False
+    result = []
+    column = []
+    def __init__(self, flag_, result_, col_):
+        self.flag    = flag_
+        self.result  = result_
+        self.column  = col_
 
 #C++ 异步执行完毕db操作回调
 def db_query_callback(callback_id_, flag_, result_, col_):
     global DB_CALLBACK_DICT
     cb = DB_CALLBACK_DICT.get(callback_id_)
     del DB_CALLBACK_DICT[callback_id_]
-    cb(result_)
+    print('db_query_callback', callback_id_, flag_, result_, col_)
+    if cb != None:
+        ret = query_result_t(flag_, result_, col_)
+        cb(ret)
 
-
+# 封装异步操作数据库类
 def ffdb_create(host_):
     db_id = ffext.ffscene_obj.connect_db(host_)
     if db_id == 0:
         return None
     return ffdb_t(host_, db_id)
 
+
+#封装escape操作
+def escape(s_):
+    return ffext.escape(s_)
