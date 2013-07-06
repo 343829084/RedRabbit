@@ -44,6 +44,6 @@ private:
     int      m_affect_rows_num;
 
 };
-
+}
 #endif
 
