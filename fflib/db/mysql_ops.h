@@ -35,10 +35,11 @@ public:
     virtual void rollback_transaction();
     virtual int  ping();
     
-
+private:
+    void clear_env();
 private:
     string   m_host_arg;
-    MYSQL    m_mysql;
+    MYSQL*   m_mysql;
     bool     m_connected;
     string   m_error;
     int      m_affect_rows_num;

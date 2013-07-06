@@ -3,13 +3,13 @@
 #include "db/mysql_ops.h"
 #include "base/strtool.h"
 #include <string.h>
+#include <stdlib.h>
 
 using namespace ff;
 
 mutex_t mysql_ops_t::g_mutex;
 
 mysql_ops_t::mysql_ops_t():
-    m_mysql(NULL),
     m_connected(false),
     m_affect_rows_num(0)
 {
