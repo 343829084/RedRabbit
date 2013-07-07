@@ -151,14 +151,14 @@ print("loading.......")
 * 使用python构建实时服务器完全可以做到，在一些页游和手游项目尤其适合。确保高实时性的建议一是把数据在内存中操作，二是io操作异步化。
 * RedRabbit支持Client与Python的通信协议有Json、thrift、protobuf。我个人最喜欢thrift。
 * RedRabbit支持跨区组通信，通过BrokerBridge把GroupA和GroupB的BrokerMaster连通起来。示例：
-　　启动BrokerBridge：
-　　./app_redrabbit  -broker tcp://127.0.0.1:10241
-　　启动GroupA的BrokerMaster:
-　　./app_redrabbit  -broker tcp://127.0.0.1:10242 -bridge_broker GroupA@tcp://127.0.0.1:10241
-　　启动GroupB的BrokerMaster:
-　　./app_redrabbit  -broker tcp://127.0.0.1:10242 -bridge_broker GroupB@tcp://127.0.0.1:10241
-　　在GroupA的python中就可以这样调用GroupB的接口：
-　　Ffext.bridge_call(‘GroupB’, cmd, msg, callback)
+　　* 启动BrokerBridge：
+　　* * ./app_redrabbit  -broker tcp://127.0.0.1:10241
+　　* 启动GroupA的BrokerMaster:
+　　* ./app_redrabbit  -broker tcp://127.0.0.1:10242 -bridge_broker GroupA@tcp://127.0.0.1:10241
+　　* 启动GroupB的BrokerMaster:
+　　* ./app_redrabbit  -broker tcp://127.0.0.1:10242 -bridge_broker GroupB@tcp://127.0.0.1:10241
+　　* 在GroupA的python中就可以这样调用GroupB的接口：
+　　* Ffext.bridge_call(‘GroupB’, cmd, msg, callback)
 　　
 * 项目源码：
 　　https://github.com/fanchy/RedRabbit
