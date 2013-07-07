@@ -1,5 +1,6 @@
 # RedRabbit
 ## 经典网游服务器架构
+![](https://raw.github.com/fanchy/ffui/master/html/images/game.jpg)
  该图省略了专门用途的dbserver、guildserver等用于专门功能的server，该架构的优点有：
  * LoginGate相当于DNS，可以动态的保证GameGate之间负载均衡。
  * 由于Clientt的逻辑操作都是由GameServer处理的，而Client的消息请求都被GameGate转发到GameServer上，所以在不同的GameGate上的client仍能出现在相同的场景里。若在不同的场景，又可以将其分布在不公的GameServer处理，从而实现了GameServer的Scalability。
@@ -15,7 +16,7 @@
  * Route服务，实现Client和Server之间的消息转发
  * 注册服务，Server必须要注册到Broker上这样Broker才能提供LookUp和Route功能。
 BrokerPattern示意图：
-
+![](https://raw.github.com/fanchy/ffui/master/html/images/pattern.jpg)
 
 　　所以今天的主题是如何利用BrokerPattern构建实时的服务器框架。
 ## RedRabbit
@@ -34,7 +35,7 @@ BrokerPattern示意图：
  * Service提供给Client调用的接口，并把接口注册到Broker上，Service若调用了其他的Service的接口，则相对于其他Service其为Client角色。
  * BrokerBridge负责桥接各个brokerMaster，每一个BrokerMaster负责一组服务，BrokerBridge使Client调用其他组接口和调用本组的接口一样容易，因为只需要指定对方服务名称即可。
 各个角色示意图：
-
+![](https://raw.github.com/fanchy/ffui/master/html/images/Broker.jpg)
 使用FFRPC实现的Echo服务实例代码：
 http://www.cnblogs.com/zhiranok/archive/2013/06/06/ffrpc.html
 ## RedRabbit中的其他组件Gate和Scene
