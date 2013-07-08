@@ -27,6 +27,7 @@ BrokerPattern示意图：
  * 该框架能够容易的构建单个区组的构架
  * 该框架支持跨区组通信，这也是Broker模式的优势，节点之间通信不需要知道对方的位置，只需要知道对方的名称
  * 这个框架的名字叫RedRabbit。
+
 ### FFRPC
 　　首先介绍RedRabbit的通信组件ffrpc，ffrpc中有如下5种角色：
  * BrokerMaster，负责管理所有的BrokerSlave，所有Slave需要注册到BrokerMaster上，BrokerMaster同步所有信息给所有节点。
