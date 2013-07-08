@@ -38,6 +38,7 @@ BrokerPattern示意图：
 ![](https://raw.github.com/fanchy/ffui/master/html/images/Broker.jpg)
 使用FFRPC实现的Echo服务实例代码：
 http://www.cnblogs.com/zhiranok/archive/2013/06/06/ffrpc.html
+
 ## RedRabbit中的其他组件Gate和Scene
 ### Gate
 　　外网接入的client有些特殊，需要一定的安全处理。Gate是专门用于接入外部Client的组件。Gate的作用有：
