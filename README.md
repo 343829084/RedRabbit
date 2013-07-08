@@ -165,10 +165,6 @@ print("loading.......")
 * 项目源码：
 　　https://github.com/fanchy/RedRabbit
 　　
-## TODO:
-构建跨服的demo示例, 下一篇在写。
-　　
-
 
 
 
