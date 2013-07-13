@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import json
-import ff as ffext
+import ff
 
 g_session_verify_callback  = None
 g_session_enter_callback   = None
@@ -11,22 +11,30 @@ g_timer_callback_dict = {}
 def session_verify_callback(func_):
     global g_session_verify_callback
     g_session_verify_callback = func_
+    return func_
 def session_enter_callback(func_):
     global g_session_enter_callback
     g_session_enter_callback = func_
+    return func_
 def session_offline_callback(func_):
     global g_session_offline_callback
     g_session_offline_callback = func_
+    return func_
 GID = 0
 def once_timer(timeout_, func_):
     global g_timer_callback_dict, GID
     GID += 1
     g_timer_callback_dict[GID] = func_
-    ffext.ffscene_obj.once_timer(timeout_, GID);
+    ff.ffscene_obj.once_timer(timeout_, GID);
 
 
 def json_to_value(val_):
     return json.loads(val_)
+
+def protobuf_to_value(msg_type_, val_):
+    dest = msg_type_()
+    dest.ParseFromString(val_)
+    return dest
 
 def session_call(cmd_, protocol_type_ = 'json'):
     global g_session_logic_callback_dict
@@ -39,6 +47,7 @@ def session_call(cmd_, protocol_type_ = 'json'):
                 dest.ParseFromString(val_)
                 return dest
             g_session_logic_callback_dict[cmd_] = (protobuf_to_value, func_)
+        return func_
     return session_logic_callback
 
 def ff_session_verify(session_key, online_time, ip, gate_name):
@@ -98,19 +107,19 @@ def to_str(msg):
         return json.dumps(msg, ensure_ascii=False)
 
 def send_msg_session(session_id, cmd_, body):
-    ffext.ffscene_obj.send_msg_session(session_id, cmd_, to_str(body))
+    ff.ffscene_obj.send_msg_session(session_id, cmd_, to_str(body))
 def multi_send_msg_session(session_id_list, cmd_, body):
-    return ffext.ffscene_obj.multicast_msg_session(session_id_list, cmd_, to_str(body))
+    return ff.ffscene_obj.multicast_msg_session(session_id_list, cmd_, to_str(body))
 def broadcast_msg_session(cmd_, body):
-    return ffext.ffscene_obj.broadcast_msg_session(cmd_, to_str(body))
+    return ff.ffscene_obj.broadcast_msg_session(cmd_, to_str(body))
 def broadcast_msg_gate(gate_name_, cmd_, body):
-    return ffext.ffscene_obj.broadcast_msg_gate(gate_name_, cmd_, body)
+    return ff.ffscene_obj.broadcast_msg_gate(gate_name_, cmd_, body)
 def close_session(session_id):
-    return ffext.ffscene_obj.close_session(session_id)
+    return ff.ffscene_obj.close_session(session_id)
 
 def reload(name_):
-    if name_ != 'ffext':
-        return ffext.ffscene_obj.reload(name_)
+    if name_ != 'ff':
+        return ff.ffscene_obj.reload(name_)
 
 singleton_register_dict = {}
 def singleton(type_):
@@ -140,7 +149,7 @@ class ffdb_t(object):
         global DB_CALLBACK_DICT, DB_CALLBACK_ID
         DB_CALLBACK_ID += 1
         DB_CALLBACK_DICT[DB_CALLBACK_ID] = callback_
-        ffext.ffscene_obj.db_query(self.db_id, sql_, DB_CALLBACK_ID)
+        ff.ffscene_obj.db_query(self.db_id, sql_, DB_CALLBACK_ID)
 #封装query返回的结果
 class query_result_t(object):
     flag   = False
@@ -163,7 +172,7 @@ def db_query_callback(callback_id_, flag_, result_, col_):
 
 # 封装异步操作数据库类
 def ffdb_create(host_):
-    db_id = ffext.ffscene_obj.connect_db(host_)
+    db_id = ff.ffscene_obj.connect_db(host_)
     if db_id == 0:
         return None
     return ffdb_t(host_, db_id)
@@ -171,4 +180,38 @@ def ffdb_create(host_):
 
 #封装escape操作
 def escape(s_):
-    return ffext.escape(s_)
+    return ff.escape(s_)
+
+g_call_service_dict = {}
+g_call_service_id   = 1
+#各个scene之间的互相调用
+def call_service(name_, cmd_, msg_, callback_ = None):
+    id = 0
+    if callback_ != None:
+        global g_call_service_id
+        id = g_call_service_id
+        g_call_service_id += 1
+    ff.call_service(name_, cmd_, to_str(msg_), id)
+
+g_py_service_func_dict = {}
+# c++ 调用的
+def call_py_service(cmd_, msg_):
+    func = g_py_service_func_dict.get(cmd_)
+    ret = func(msg_)
+    if ret != None:
+        return to_str(ret)
+    return ''
+
+# 注册接口
+def reg_service(cmd_, msg_type_ = None):
+    def bind_func(func_):
+        def impl_func(msg_):
+            if None == msg_type_:
+                return func_(json_to_value(msg_))
+            else: #protobuf
+                return func_(protobuf_to_value(msg_type_, msg_))
+
+        global g_py_service_func_dict
+        g_py_service_func_dict[cmd_] = impl_func
+        return func_
+    return bind_func
