@@ -19,46 +19,65 @@ int main(int argc, char* argv[])
 {
     if (argc == 1)
     {
-        printf("./app_redrabbit -gate gate@0 -broker tcp://127.0.0.1:10241 -gate_listen tcp://*:10242 -python_path ./ -scene scene@0\n");
+        printf("./app_redrabbit -f default.config\n");
         return 0;
     }
-    arg_helper_t arg_helper(argc, argv);
-    
-    //! 美丽的日志组件，shell输出是彩色滴！！
-    LOG.start("-log_path ./log -log_filename log -log_class DB_MGR,XX,BROKER,FFRPC,FFGATE,FFSCENE,FFSCENE_PYTHON,FFNET -log_print_screen true -log_print_file true -log_level 6");
 
-    ffbroker_t ffbroker;
-    ffgate_t ffgate;
-    ffscene_python_t ffscene_python;
+    arg_helper_t arg_helper(argc, argv);
+    arg_helper.load_from_file("default.config");
 
     if (arg_helper.is_enable_option("-d"))
     {
         daemon_tool_t::daemon();
     }
-
-    //! 启动broker，负责网络相关的操作，如消息转发，节点注册，重连等
-    ffbroker.open(arg_helper);
     
+    //! 美丽的日志组件，shell输出是彩色滴！！
+    if (arg_helper.is_enable_option("-log_path"))
+    {
+        LOG.start(arg_helper);
+    }
+    else
+    {
+        LOG.start("-log_path ./log -log_filename log -log_class DB_MGR,XX,BROKER,FFRPC,FFGATE,FFSCENE,FFSCENE_PYTHON,FFNET -log_print_screen true -log_print_file true -log_level 6");
+    }
+    ffbroker_t ffbroker;
+    ffgate_t ffgate;
+    ffscene_python_t ffscene_python;
+
     try
     {
-        if (ffgate.open(arg_helper))
+        //! 启动broker，负责网络相关的操作，如消息转发，节点注册，重连等
+        if (arg_helper.is_enable_option("-broker"))
         {
-            printf("gate open error!\n");
-            sleep(1);
-            return 0;
+            if (ffbroker.open(arg_helper))
+            {
+                printf("broker open failed\n");
+                return -1;
+            }
         }
-        
-        if (ffscene_python.open(arg_helper))
+        if (arg_helper.is_enable_option("-gate"))
         {
-            sleep(1);
-            printf("scene open error!\n");
-            return 0;
+            if (ffgate.open(arg_helper))
+            {
+                printf("gate open error!\n");
+                return -1;
+            }
+        }
+        if (arg_helper.is_enable_option("-scene"))
+        {
+            if (ffscene_python.open(arg_helper))
+            {
+                printf("scene open error!\n");
+                return -1;
+            }
         }
     }
     catch(exception& e_)
     {
         printf("exception=%s\n", e_.what());
+        return -1;
     }
+
     signal_helper_t::wait();
 
     ffgate.close();
