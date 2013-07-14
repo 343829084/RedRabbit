@@ -20,7 +20,9 @@ namespace ff
 #define OFFLINE_CB_NAME     "ff_session_offline"
 #define LOGIC_CB_NAME       "ff_session_logic"
 #define TIMER_CB_NAME       "ff_timer_callback"
-#define DB_QUERY_CB_NAME    "db_query_callback"
+#define DB_QUERY_CB_NAME    "ff_db_query_callback"
+#define SCENE_CALL_CB_NAME  "ff_scene_call"
+#define CALL_SERVICE_RETURN_MSG_CB_NAME "ff_scene_call_return_msg"
 
 class ffscene_python_t: public ffscene_t
 {
@@ -38,9 +40,13 @@ public:
                   .reg(&ffscene_python_t::change_session_scene, "change_session_scene")
                   .reg(&ffscene_python_t::once_timer, "once_timer")
                   .reg(&ffscene_python_t::reload, "reload")
+                  .reg(&ffscene_python_t::pylog, "pylog")
                   .reg(&ffscene_python_t::is_exist, "is_exist")
                   .reg(&ffscene_python_t::connect_db, "connect_db")
-                  .reg(&ffscene_python_t::db_query, "db_query");
+                  .reg(&ffscene_python_t::db_query, "db_query")
+                  .reg(&ffscene_python_t::call_service, "call_service")
+                  .reg(&ffscene_python_t::bridge_call_service, "bridge_call_service");
+
         m_ffpython.reg(&ffdb_t::escape, "escape");
     
         m_ffpython.init("ff");
@@ -50,6 +56,7 @@ public:
         this->callback_info().enter_callback = gen_enter_callback();
         this->callback_info().offline_callback = gen_offline_callback();
         this->callback_info().logic_callback = gen_logic_callback();
+        this->callback_info().scene_call_callback = gen_scene_call_callback();
 
         if (arg_helper.is_enable_option("-python_path"))
         {
@@ -83,6 +90,10 @@ public:
         }
         LOGTRACE((FFSCENE_PYTHON, "ffscene_python_t::reload end ok name_[%s]", name_));
         return "";
+    }
+    void pylog(const string& mod_, const string& content_)
+    {
+        LOGTRACE((mod_.c_str(), "%s", content_));
     }
     //! 判断某个service是否存在
     bool is_exist(const string& service_name_)
@@ -199,7 +210,7 @@ public:
                 }
                 logic_msg_arg* data = (logic_msg_arg*)args_;
                 static string func_name  = LOGIC_CB_NAME;
-                LOGINFO((FFSCENE_PYTHON, "ffscene_python_t::gen_logic_callback body<%s>,len[%lu]", data->body, data->body.size()));
+                LOGINFO((FFSCENE_PYTHON, "ffscene_python_t::gen_logic_callback len[%lu]", data->body.size()));
                 try
                 {
                     ffscene->m_ffpython.call<void>(ffscene->m_ext_name, func_name,
@@ -208,6 +219,41 @@ public:
                 catch(exception& e_)
                 {
                     LOGERROR((FFSCENE_PYTHON, "ffscene_python_t::gen_logic_callback exception<%s>", e_.what()));
+                }
+            }
+            virtual ffslot_t::callback_t* fork() { return new lambda_cb(ffscene); }
+            ffscene_python_t* ffscene;
+        };
+        return new lambda_cb(this);
+    }
+    ffslot_t::callback_t* gen_scene_call_callback()
+    {
+        struct lambda_cb: public ffslot_t::callback_t
+        {
+            lambda_cb(ffscene_python_t* p):ffscene(p){}
+            virtual void exe(ffslot_t::callback_arg_t* args_)
+            {
+                if (args_->type() != TYPEID(scene_call_msg_arg))
+                {
+                    return;
+                }
+                scene_call_msg_arg* data = (scene_call_msg_arg*)args_;
+                static string func_name  = SCENE_CALL_CB_NAME;
+                LOGINFO((FFSCENE_PYTHON, "ffscene_python_t::gen_scene_call_callback len[%lu]", data->body.size()));
+                try
+                {
+                    vector<string> ret = ffscene->m_ffpython.call<vector<string> >(ffscene->m_ext_name, func_name,
+                                                                                    data->cmd, data->body);
+                    if (ret.size() == 2)
+                    {
+                        data->msg_type = ret[0];
+                        data->ret      = ret[1];
+                    }
+                }
+                catch(exception& e_)
+                {
+                    data->err = e_.what();
+                    LOGERROR((FFSCENE_PYTHON, "ffscene_python_t::gen_scene_call_callback exception<%s>", e_.what()));
                 }
             }
             virtual ffslot_t::callback_t* fork() { return new lambda_cb(ffscene); }
@@ -289,6 +335,33 @@ public:
     void db_query(long db_id_,const string& sql_, long callback_id_)
     {
         m_db_mgr.db_query(db_id_, sql_, gen_db_query_callback(callback_id_));
+    }
+    void call_service(const string& name_, long cmd_, const string& msg_, long id_)
+    {
+        scene_call_msg_t::in_t inmsg;
+        inmsg.cmd = cmd_;
+        inmsg.body = msg_;
+        m_ffrpc->call(name_, inmsg, ffrpc_ops_t::gen_callback(&ffscene_python_t::call_service_return_msg, this, id_));
+    }
+    void bridge_call_service(const string& group_name_, const string& name_, long cmd_, const string& msg_, long id_)
+    {
+        scene_call_msg_t::in_t inmsg;
+        inmsg.cmd = cmd_;
+        inmsg.body = msg_;
+        m_ffrpc->bridge_call(group_name_, name_, inmsg, ffrpc_ops_t::gen_callback(&ffscene_python_t::call_service_return_msg, this, id_));
+    }
+    void call_service_return_msg(ffreq_t<scene_call_msg_t::out_t>& req_, long id_)
+    {
+        static string func_name   = CALL_SERVICE_RETURN_MSG_CB_NAME;
+        try
+        {
+            m_ffpython.call<void>(m_ext_name, func_name,
+                                  id_, req_.arg.err, req_.arg.msg_type, req_.arg.body);
+        }
+        catch(exception& e_)
+        {
+            LOGERROR((FFSCENE_PYTHON, "ffscene_python_t::gen_db_query_callback exception<%s>", e_.what()));
+        }
     }
 public:
     ffpython_t      m_ffpython;

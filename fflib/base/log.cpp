@@ -61,7 +61,7 @@ bool str_format_t::move_to_next_wildcard()
 				break;
 			}
 			else if (cur == 'c' || cur == 'd' || cur == 'u' || cur == 'x' ||
-					 cur == 'f' || cur == 's')
+					 cur == 'f' || cur == 's' || cur == 'p')
 			{
 				m_fmt_type.type    = cur;
 				m_fmt_type.min_len = ::atoi(m_fmt + cur_format_index + 1);

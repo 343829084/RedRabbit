@@ -27,6 +27,7 @@ int ffscene_t::open(arg_helper_t& arg_helper)
     m_ffrpc->reg(&ffscene_t::process_session_enter, this);
     m_ffrpc->reg(&ffscene_t::process_session_offline, this);
     m_ffrpc->reg(&ffscene_t::process_session_req, this);
+    m_ffrpc->reg(&ffscene_t::process_scene_call, this);
     
     if (m_ffrpc->open(arg_helper.get_option_value("-broker")))
     {
@@ -102,6 +103,26 @@ int ffscene_t::process_session_req(ffreq_t<route_logic_msg_t::in_t, route_logic_
     }
     req_.response(out);
     LOGTRACE((FFSCENE, "ffscene_t::process_session_req end ok"));
+    return 0;
+}
+
+//! scene 之间的互调用
+int ffscene_t::process_scene_call(ffreq_t<scene_call_msg_t::in_t, scene_call_msg_t::out_t>& req_)
+{
+    LOGTRACE((FFSCENE, "ffscene_t::process_scene_call begin cmd[%u]", req_.arg.cmd));
+    scene_call_msg_t::out_t out;
+    if (m_callback_info.scene_call_callback)
+    {
+        scene_call_msg_arg arg(req_.arg.cmd, req_.arg.body, out.err, out.msg_type, out.body);
+        m_callback_info.scene_call_callback->exe(&arg);
+    }
+    else
+    {
+        out.err = "no scene_call_callback bind";
+    }
+    req_.response(out);
+
+    LOGTRACE((FFSCENE, "ffscene_t::process_scene_call end ok"));
     return 0;
 }
 

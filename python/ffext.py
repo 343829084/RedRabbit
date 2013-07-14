@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import ff
+import sys
 
 g_session_verify_callback  = None
 g_session_enter_callback   = None
@@ -161,7 +162,7 @@ class query_result_t(object):
         self.column  = col_
 
 #C++ 异步执行完毕db操作回调
-def db_query_callback(callback_id_, flag_, result_, col_):
+def ff_db_query_callback(callback_id_, flag_, result_, col_):
     global DB_CALLBACK_DICT
     cb = DB_CALLBACK_DICT.get(callback_id_)
     del DB_CALLBACK_DICT[callback_id_]
@@ -182,25 +183,60 @@ def ffdb_create(host_):
 def escape(s_):
     return ff.escape(s_)
 
-g_call_service_dict = {}
+g_call_service_wait_return_dict = {}
 g_call_service_id   = 1
 #各个scene之间的互相调用
 def call_service(name_, cmd_, msg_, callback_ = None):
     id = 0
     if callback_ != None:
-        global g_call_service_id
+        global g_call_service_id, g_call_service_wait_return_dict
         id = g_call_service_id
         g_call_service_id += 1
-    ff.call_service(name_, cmd_, to_str(msg_), id)
+        g_call_service_wait_return_dict[id] = callback_
+    ff.ffscene_obj.call_service(name_, cmd_, to_str(msg_), id)
+def bridge_call_service(group_name_, name_, cmd_, msg_, callback_ = None):
+    id = 0
+    if callback_ != None:
+        global g_call_service_id, g_call_service_wait_return_dict
+        id = g_call_service_id
+        g_call_service_id += 1
+        g_call_service_wait_return_dict[id] = callback_
+    ff.ffscene_obj.bridge_call_service(group_name_, name_, cmd_, to_str(msg_), id)
+
 
 g_py_service_func_dict = {}
 # c++ 调用的
-def call_py_service(cmd_, msg_):
+def ff_scene_call(cmd_, msg_):
     func = g_py_service_func_dict.get(cmd_)
     ret = func(msg_)
     if ret != None:
-        return to_str(ret)
-    return ''
+        if hasattr(ret, 'SerializeToString2'):
+            return [ret.__name__, ret.SerializeToString()]
+        elif isinstance(ret, unicode):
+            return ['json', ret.encode('utf-8')]
+        elif isinstance(ret, str):
+            return ['json', ret]
+        else:
+            return ['json', json.dumps(ret, ensure_ascii=False)]
+    return ['', '']
+
+# c++ 调用的
+def ff_scene_call_return_msg(id_, err_, msg_type_, msg_):
+    func = g_call_service_wait_return_dict.get(id_)
+    if func != None:
+        del g_call_service_wait_return_dict[id_]
+        if err_ == '':
+            err_ = None
+        else:
+            func(err_, None)
+            return
+        if msg_type_ == 'json':
+            func(err_, json_to_value(msg_))
+        else:# protobuff
+            dest_type = eval(msg_type_)
+            func(err_, protobuf_to_value(dest_type, msg_))
+
+
 
 # 注册接口
 def reg_service(cmd_, msg_type_ = None):
@@ -215,3 +251,15 @@ def reg_service(cmd_, msg_type_ = None):
         g_py_service_func_dict[cmd_] = impl_func
         return func_
     return bind_func
+
+#将python的标准输出导出到日志
+save_stdout = None
+class mystdout_t(object):
+    def write(self, x):
+        if x == '\n':
+            return 1
+        ff.ffscene_obj.pylog('FFSCENE_PYTHON', x)
+        return len(x)
+def dump_stdout_to_log():
+    save_stdout = sys.stdout
+    sys.stdout = mystdout_t()

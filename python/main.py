@@ -41,7 +41,7 @@ def process_chat(session_id, msg):
 
     ret = '<font color="#008000">[%s %s]:</font>%s'%(session_id, GetNowTime(), content)
     ffext.broadcast_msg_session(1, ret)
-    
+    test_call_scene()
 
 
 #这个修饰器的意思是注册下面函数处理验证client账号密码，
@@ -94,4 +94,19 @@ def mysql_test():
         print(ret.flag, ret.result, ret.column, ffext.DB_CALLBACK_DICT)
     db.query('select * from dumy', cb)#cb 为异步回调函数
     ffext.reload('main')#重载此脚本
+
+#scene直接可以互相调用
+def test_call_scene():
+    ffext.dump_stdout_to_log()
+    def cb(err_, msg_):
+        if err_:
+            print('error=%s'%(err_))
+        else:
+            print(err_, msg_)
+    ffext.call_service('scene@0', 200, {'hello':'world'}, cb)
+    #ffext.bridge_call_service('groupa', 'scene@0', 200, {'hello':'world'}, cb)
+@ffext.reg_service(200)
+def test_scene_call(msg_):
+    print("T"*20, msg_)
+    return {'oh':'nice'}
 

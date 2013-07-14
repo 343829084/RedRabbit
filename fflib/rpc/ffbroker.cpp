@@ -45,7 +45,8 @@ int ffbroker_t::open(arg_helper_t& arg)
             .bind(BROKER_TO_BRIDGE_ROUTE_MSG, ffrpc_ops_t::gen_callback(&ffbroker_t::handle_broker_to_bridge_route_msg, this))
             .bind(BRIDGE_TO_BROKER_ROUTE_MSG, ffrpc_ops_t::gen_callback(&ffbroker_t::handle_bridge_to_broker_route_msg, this))
             .bind(BRIDGE_BROKER_TO_BROKER_MSG, ffrpc_ops_t::gen_callback(&ffbroker_t::bridge_handle_broker_to_broker_msg, this))
-            .bind(BROKER_BRIDGE_REGISTER, ffrpc_ops_t::gen_callback(&ffbroker_t::handle_broker_register_bridge, this));
+            .bind(BROKER_BRIDGE_REGISTER, ffrpc_ops_t::gen_callback(&ffbroker_t::handle_broker_register_bridge, this))
+            .bind(BRIDGE_SYNC_DATA, ffrpc_ops_t::gen_callback(&ffbroker_t::handle_bridge_sync_data, this));
 
             
 
@@ -142,7 +143,8 @@ int ffbroker_t::connect_to_bridge_broker()
         register_bridge_broker_t::in_t msg;
         msg.broker_group = m_master_group_name;
         msg_sender_t::send(broker_bridge_info.sock, BROKER_BRIDGE_REGISTER, msg);
-        LOGINFO((BROKER, "ffbroker_t::connect_to_bridge_broker dest<%s>, node_id[%u]", broker_bridge_info.host, psession->get_node_id()));
+        LOGINFO((BROKER, "ffbroker_t::connect_to_bridge_broker dest<%s>, node_id[%u] sock=[%p]",
+                 broker_bridge_info.host, psession->get_node_id(), broker_bridge_info.sock));
     }
 
     LOGINFO((BROKER, "ffbroker_t::connect_to_bridge_broker ok<%s>", m_master_group_name.c_str()));
@@ -272,6 +274,10 @@ int ffbroker_t::handle_msg_impl(const message_t& msg_, socket_ptr_t sock_)
             return -1;
         }
     }
+    else
+    {
+        LOGERROR((BROKER, "ffbroker_t::handle_msg_impl no cmd<%u>", cmd));
+    }
     return -1;
 }
 
@@ -281,7 +287,33 @@ int ffbroker_t::handle_broker_register_bridge(register_bridge_broker_t::in_t& ms
     session_data_t* psession = new session_data_t(alloc_id());
     sock_->set_data(psession);
     m_broker_group_info[msg_.broker_group].sock = sock_;
+    
+    register_bridge_broker_t::out_t out_msg;
+    map<string/*group name*/, broker_group_info_t>::iterator it = m_broker_group_info.begin();
+    for (; it != m_broker_group_info.end(); ++it)
+    {
+        out_msg.broker_group.insert(it->first);
+    }
+    for (it = m_broker_group_info.begin(); it != m_broker_group_info.end(); ++it)
+    {
+        msg_sender_t::send(it->second.sock, BRIDGE_SYNC_DATA, out_msg);
+    }
     LOGINFO((BROKER, "ffbroker_t::handle_broker_register_bridge end ok broker group[%s]", msg_.broker_group));
+    return 0;
+}
+int ffbroker_t::handle_bridge_sync_data(register_bridge_broker_t::out_t& msg_, socket_ptr_t sock_)
+{
+    if (NULL == sock_->get_data<session_data_t>())
+    {
+        return 0;
+    }
+    uint32_t node_id = sock_->get_data<session_data_t>()->get_node_id();
+    for (set<string>::iterator it = msg_.broker_group.begin(); it != msg_.broker_group.end(); ++it)
+    {
+        m_broker_bridge_info[node_id].broker_group_id[*it] = alloc_id();
+        LOGINFO((BROKER, "ffbroker_t::handle_bridge_sync_data broker group [%s]", *it));
+    }
+
     return 0;
 }
 
@@ -466,8 +498,8 @@ int ffbroker_t::route_msg_broker_to_bridge(const string& from_broker_group_name_
     dest_msg.from_node_id = from_node_id_;
     dest_msg.dest_node_id = dest_node_id_;
     dest_msg.callback_id  = callback_id_;//! 回调函数的id
-    msg_sender_t::send(sock_, BROKER_TO_BRIDGE_ROUTE_MSG, dest_msg);
-    LOGINFO((BROKER, "ffbroker_t::route_msg_broker_to_bridge dest broker group[%s]", dest_broker_group_name_));
+    msg_sender_t::send(sock_, BRIDGE_BROKER_TO_BROKER_MSG, dest_msg);
+    LOGINFO((BROKER, "ffbroker_t::route_msg_broker_to_bridge dest broker group[%s] sock_[%p]", dest_broker_group_name_, sock_));
     return 0;
 }
 //! [2]
@@ -498,7 +530,7 @@ int ffbroker_t::handle_broker_to_bridge_route_msg(broker_route_to_bridge_t::in_t
     dest_msg.dest_node_id = msg_.dest_node_id;
     dest_msg.callback_id  = msg_.callback_id;//! 回调函数的id
     msg_sender_t::send(dest_sock, BRIDGE_BROKER_TO_BROKER_MSG, dest_msg);
-    LOGINFO((BROKER, "ffbroker_t::handle_broker_to_bridge_route_msg end ok dest node id[%u]", dest_msg.dest_node_id));
+    LOGINFO((BROKER, "ffbroker_t::handle_broker_to_bridge_route_msg end ok dest node id[%u] dest_sock[%p]", dest_msg.dest_node_id, dest_sock));
     return 0;
 }
 
@@ -510,6 +542,7 @@ int ffbroker_t::bridge_handle_broker_to_broker_msg(bridge_route_to_broker_t::in_
     {
         return -1;
     }
+    
     msg_sender_t::send(it->second.sock, BRIDGE_TO_BROKER_ROUTE_MSG, msg_);
     LOGINFO((BROKER, "ffbroker_t::bridge_handle_broker_to_broker_msg end ok dest node id[%u]", msg_.dest_node_id));
     return 0;

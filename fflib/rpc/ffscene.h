@@ -24,18 +24,21 @@ public:
             verify_callback(NULL),
             enter_callback(NULL),
             offline_callback(NULL),
-            logic_callback(NULL)
+            logic_callback(NULL),
+            scene_call_callback(NULL)
         {}
         ffslot_t::callback_t*   verify_callback;
         ffslot_t::callback_t*   enter_callback;
         ffslot_t::callback_t*   offline_callback;
         ffslot_t::callback_t*   logic_callback;
+        ffslot_t::callback_t*   scene_call_callback;
     };
     
     class session_verify_arg;
     class session_enter_arg;
     class session_offline_arg;
     class logic_msg_arg;
+    class scene_call_msg_arg;
     
     //! 记录session的信息
     struct session_info_t
@@ -73,7 +76,8 @@ private:
     int process_session_offline(ffreq_t<session_offline_t::in_t, session_offline_t::out_t>& req_);
     //! 转发client消息
     int process_session_req(ffreq_t<route_logic_msg_t::in_t, route_logic_msg_t::out_t>& req_);
-    
+    //! scene 之间的互调用
+    int process_scene_call(ffreq_t<scene_call_msg_t::in_t, scene_call_msg_t::out_t>& req_);
 protected:
     string                                      m_logic_name;
     shared_ptr_t<ffrpc_t>                       m_ffrpc;
@@ -154,6 +158,28 @@ public:
     string          session_id;
     uint16_t        cmd;
     string          body;
+};
+
+class ffscene_t::scene_call_msg_arg: public ffslot_t::callback_arg_t
+{
+public:
+    scene_call_msg_arg(uint16_t cmd_, const string& t_, string& err_, string& msg_type_, string& ret_):
+        cmd(cmd_),
+        body(t_),
+        err(err_),
+        msg_type(msg_type_),
+        ret(ret_)
+    {}
+    virtual int type()
+    {
+        return TYPEID(scene_call_msg_arg);
+    }
+    uint16_t        cmd;
+    const string&   body;
+    
+    string&         err;
+    string&         msg_type;
+    string&         ret;
 };
 
 }

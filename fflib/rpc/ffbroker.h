@@ -95,6 +95,8 @@ private:
     
     //! 处理broker master 注册到broker bridge
     int handle_broker_register_bridge(register_bridge_broker_t::in_t& msg_, socket_ptr_t sock_);
+    //! 处理bridge 同步消息
+    int handle_bridge_sync_data(register_bridge_broker_t::out_t& msg_, socket_ptr_t sock_);
 private:
     //! 分配broker slave的索引id
     uint32_t                                m_alloc_slave_broker_index;

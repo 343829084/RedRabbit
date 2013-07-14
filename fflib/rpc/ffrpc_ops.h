@@ -386,10 +386,12 @@ enum ffrpc_cmd_def_e
     BRIDGE_TO_BROKER_ROUTE_MSG,
     BRIDGE_BROKER_TO_BROKER_MSG,
     CLIENT_REGISTER_TO_SLAVE_BROKER,
+    //! bridge sync data
+    BRIDGE_SYNC_DATA,
 };
 
 
-//! 向broker master 注册slave
+//! 向broker master 注册 bridege
 struct register_bridge_broker_t
 {
     struct in_t: public ffmsg_t<in_t>
@@ -403,6 +405,18 @@ struct register_bridge_broker_t
             decoder()>> broker_group;
         }
         string          broker_group;
+    };
+    struct out_t: public ffmsg_t<out_t>
+    {
+        void encode()
+        {
+            encoder() << broker_group;
+        }
+        void decode()
+        {
+            decoder()>> broker_group;
+        }
+        set<string>     broker_group;
     };
 };
 
@@ -815,6 +829,39 @@ struct gate_broadcast_msg_to_session_t
         {
             decoder();
         }
+    };
+};
+
+//! scene 之间的互调用
+
+struct scene_call_msg_t
+{
+    struct in_t: public ffmsg_t<in_t>
+    {
+        void encode()
+        {
+            encoder() << cmd << body;
+        }
+        void decode()
+        {
+            decoder() >> cmd >> body;
+        }
+        uint16_t        cmd;
+        string          body;//! 数据
+    };
+    struct out_t: public ffmsg_t<out_t>
+    {
+        void encode()
+        {
+            encoder() << err << msg_type << body;
+        }
+        void decode()
+        {
+            decoder() >> err >> msg_type >> body;
+        }
+        string err;
+        string msg_type;
+        string body;
     };
 };
 
