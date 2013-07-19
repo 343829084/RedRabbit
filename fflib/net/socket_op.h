@@ -37,6 +37,11 @@ struct socket_op_t
         }
         return ret;
     }
+    static int set_no_delay(int sockfd, bool flag_ = true)
+    {
+        int on = flag_? 1: 0;
+        return ::setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY,&on,sizeof(on));
+    }
 };
 
 }
