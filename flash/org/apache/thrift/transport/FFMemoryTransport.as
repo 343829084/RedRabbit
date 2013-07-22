@@ -41,6 +41,7 @@ package org.apache.thrift.transport {
 		}
 		catch (e:EOFError) {
             trace("No more data available.");
+			return 0;
         }
 		return len;
     }
