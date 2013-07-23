@@ -58,6 +58,7 @@ public:
         this->callback_info().logic_callback = gen_logic_callback();
         this->callback_info().scene_call_callback = gen_scene_call_callback();
 
+        ffpython_t::add_path("./pylib");
         if (arg_helper.is_enable_option("-python_path"))
         {
             ffpython_t::add_path(arg_helper.get_option_value("-python_path"));

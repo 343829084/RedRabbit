@@ -3,6 +3,11 @@ import json
 import ff
 import sys
 
+import thrift.Thrift as Thrift
+import thrift.protocol.TBinaryProtocol as TBinaryProtocol
+import thrift.protocol.TCompactProtocol as TCompactProtocol
+import thrift.transport.TTransport as TTransport
+
 g_session_verify_callback  = None
 g_session_enter_callback   = None
 g_session_offline_callback = None
@@ -42,6 +47,15 @@ def session_call(cmd_, protocol_type_ = 'json'):
     def session_logic_callback(func_):
         if protocol_type_ == 'json':
             g_session_logic_callback_dict[cmd_] = (json_to_value, func_)
+        elif hasattr(protocol_type_, 'thrift_spec'):
+            def thrift_to_value(val_):
+                print('T'*30, len(val_))
+                dest = protocol_type_()
+                mb2 = TTransport.TMemoryBuffer(val_)
+                bp2 = TBinaryProtocol.TBinaryProtocol(mb2)
+                dest.read(bp2);
+                return dest
+            g_session_logic_callback_dict[cmd_] = (thrift_to_value, func_)
         else: #protobuf
             def protobuf_to_value(val_):
                 dest = protocol_type_()

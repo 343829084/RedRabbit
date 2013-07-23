@@ -2,6 +2,7 @@
 import os
 import time
 import ffext
+from  ffpy.MsgDef.ttypes import chat_msg_t
 
 def GetNowTime():
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
@@ -27,9 +28,9 @@ class player_t(object):
         return self.session_id
 
 #这个修饰器的意思是注册process_chat函数接收cmd=1的消息
-@ffext.session_call(1)
+@ffext.session_call(1, chat_msg_t)
 def process_chat(session_id, msg):
-    content = msg[0]
+    content = msg.value
     if content == 'reload':
         os.system('./update_code.sh')
         ret = ffext.reload('main')#重载此脚本
