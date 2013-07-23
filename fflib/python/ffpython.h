@@ -1338,13 +1338,14 @@ struct pytype_traits_t<string>
 {
     static PyObject* pyobj_from_cppobj(const string& val_)
     {
-        return PyString_FromString(val_.c_str());
+        //return PyString_FromString(val_.c_str());
+        return PyString_FromStringAndSize(val_.c_str(), val_.size());
     }
     static int pyobj_to_cppobj(PyObject *pvalue_, string& m_ret)
     {
         if (true == PyString_Check(pvalue_))
         {
-            m_ret = PyString_AsString(pvalue_);
+            m_ret.append(PyString_AsString(pvalue_), PyString_Size(pvalue_));
             return 0;
         }
         else if (true == PyUnicode_Check(pvalue_))
