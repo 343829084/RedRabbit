@@ -1,4 +1,3 @@
-
 #include "base/log.h"
 #include "base/atomic_op.h"
 #include "base/strtool.h"
@@ -322,7 +321,7 @@ bool log_t::check_and_create_dir(struct tm* tm_val_)
 			}
 			break;
 		}
-
+		m_file.close();
 		m_file.open(file);
 		m_line_num = 0;
 		m_last_create_dir_tm = *tm_val_;
@@ -357,7 +356,7 @@ int log_service_t::start(arg_helper_t& arg)
 
 	if (!arg.get_option_value("-log_level").empty()) level = ::atoi(arg.get_option_value("-log_level").c_str());
 	if (!arg.get_option_value("-log_path").empty()) path = arg.get_option_value("-log_level");
-	if (!arg.get_option_value("-log_filename").empty()) path = arg.get_option_value("-log_filename");
+	if (!arg.get_option_value("-log_filename").empty()) filename = arg.get_option_value("-log_filename");
 
 	if (arg.get_option_value("-log_print_file") == "false" || arg.get_option_value("-log_print_file") == "0")
 	{
