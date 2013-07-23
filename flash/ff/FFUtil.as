@@ -12,13 +12,11 @@ import org.apache.thrift.transport.*;
 
 public class FFUtil  {
 		
-	public static function EncodeMsg(msg:TBase):ByteArray
+	public static function EncodeMsg(msg:TBase, ba:ByteArray):void
 	{
-		var ba:ByteArray = new ByteArray();
-		var tran:FFMemoryTransport = new FFMemoryTransport();
+		var tran:FFMemoryTransport = new FFMemoryTransport(ba);
 		var proto:TBinaryProtocol  = new TBinaryProtocol(tran);
 		msg.write(proto);
-		return tran.getBuffer();
 	}
 	public static function DecodeMsg(msg:TBase, ba:ByteArray):Boolean
 	{
