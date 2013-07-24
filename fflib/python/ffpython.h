@@ -1357,7 +1357,8 @@ struct pytype_traits_t<string>
 #endif
             if (retStr)
             {
-                m_ret = PyString_AsString(retStr);
+                //m_ret = PyString_AsString(retStr);
+                m_ret.append(PyString_AsString(retStr), PyString_Size(retStr));
                 Py_XDECREF(retStr);
                 return 0;
             }
