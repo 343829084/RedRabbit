@@ -14,15 +14,14 @@ package org.apache.thrift.transport {
 
   public class FFMemoryTransport extends TTransport {
 
-    private var requestBuffer_:ByteArray = new ByteArray();
-    private var responseBuffer_:ByteArray = null;
+    private var byteBuffer_:ByteArray = null;
     
     public function getBuffer():ByteArray {
-      return requestBuffer_;
+      return byteBuffer_;
     }
     
-    public function FFMemoryTransport(responseBufferArg_:ByteArray = null):void {
-		responseBuffer_ = responseBufferArg_;
+    public function FFMemoryTransport(responseBufferArg_:ByteArray):void {
+		byteBuffer_ = responseBufferArg_;
     }
     
     public override function open():void {
@@ -37,7 +36,7 @@ package org.apache.thrift.transport {
     
     public override function read(buf:ByteArray, off:int, len:int):int {
 		try {
-	        responseBuffer_.readBytes(buf, off, len);
+	        byteBuffer_.readBytes(buf, off, len);
 		}
 		catch (e:EOFError) {
             trace("No more data available.");
@@ -47,7 +46,7 @@ package org.apache.thrift.transport {
     }
 
     public override function write(buf:ByteArray, off:int, len:int):void {
-      requestBuffer_.writeBytes(buf, off, len);
+      byteBuffer_.writeBytes(buf, off, len);
     }
 
     public override function flush(callback:Function=null):void {

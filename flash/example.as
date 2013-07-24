@@ -1,5 +1,5 @@
-import ff.SharedStruct;
-import org.apache.thrift.*;
+ï»¿import ff.SharedStruct;
+import ff.FFUtil;
 
 
 mc_page0.visible = true;
@@ -11,7 +11,7 @@ var socket:Socket = new Socket();
 var isConn:Boolean = false;
 //socket init 
 socket.endian = Endian.LITTLE_ENDIAN;
-//Á¬½Ó¡¢·¢ËÍ°´Å¥ÏûÏ¢
+//è¿æ¥ã€å‘é€æŒ‰é’®æ¶ˆæ¯
 mc_page0.btn_connect.addEventListener(MouseEvent.CLICK, onConnectClicked);
 mc_page1.send_btn.addEventListener(MouseEvent.CLICK, onSendClicked);
 mc_page1.addEventListener(KeyboardEvent.KEY_DOWN, queren_btn);
@@ -23,7 +23,7 @@ function queren_btn(evt:KeyboardEvent)
 
 //functions
 function onConnectClicked(evt:Event)
-{//µã»÷Á¬½Ó
+{//ç‚¹å‡»è¿æ¥
 	socket.addEventListener(Event.CONNECT,onConn);
 	socket.addEventListener(IOErrorEvent.IO_ERROR,onError);
 	socket.addEventListener(SecurityErrorEvent.SECURITY_ERROR,onSecurity);
@@ -34,7 +34,7 @@ function onConnectClicked(evt:Event)
 }
 
 function onConn(e:Event):void 
-{//Á¬½Ó³É¹¦
+{//è¿æ¥æˆåŠŸ
 	socket.removeEventListener(Event.CONNECT,onConn);
 	socket.removeEventListener(IOErrorEvent.IO_ERROR,onError);
 	socket.removeEventListener(SecurityErrorEvent.SECURITY_ERROR,onSecurity);
@@ -42,10 +42,10 @@ function onConn(e:Event):void
 	socket.addEventListener(Event.CLOSE,onClose);
 	socket.addEventListener(ProgressEvent.SOCKET_DATA,onReceiveData);
 	isConn = true;
-//½çÃæÇĞ»»
+//ç•Œé¢åˆ‡æ¢
 	mc_page0.visible = false;
 	mc_page1.visible = true;
-//·¢ËÍÏûÏ¢
+//å‘é€æ¶ˆæ¯
 	sendMsg(0, mc_page0.txt_name.text);
 }
 
@@ -75,10 +75,11 @@ function onClose(e:Event):void {
 
 
 function sendBytesData( cmd:int, byteArray:ByteArray):void 
-{//·¢ËÍÏûÏ¢
+{//å‘é€æ¶ˆæ¯
 	var ss1:SharedStruct = new SharedStruct();
 	ss1.key = 10244;
-	var ba:ByteArray = FFUtil.EncodeMsg(ss1);
+	var ba:ByteArray = new ByteArray();
+	FFUtil.EncodeMsg(ss1, ba);
 	trace("OhNice1:" + ba.length);
 	var ss2:SharedStruct = new SharedStruct();
 	ba.position = 0;
@@ -97,28 +98,28 @@ function sendBytesData( cmd:int, byteArray:ByteArray):void
 	}
 	else 
 	{
-		mc_page1.incomingChat_txt.htmlText += "<font color='#ff0000' face='ËÎÌå' size='20'>ÄãÒÑ¶Ï¿ªÁ¬½Ó£¬ÇëÖØĞÂÁ¬½Ó£¡£¡£¡</font>"; 
-		trace("Ã»ÓĞÁ¬½ÓÉÏ°¡°¡°¡£¡£¡£¡");
+		mc_page1.incomingChat_txt.htmlText += "<font color='#ff0000' face='å®‹ä½“' size='20'>ä½ å·²æ–­å¼€è¿æ¥ï¼Œè¯·é‡æ–°è¿æ¥ï¼ï¼ï¼</font>"; 
+		trace("æ²¡æœ‰è¿æ¥ä¸Šå•Šå•Šå•Šï¼ï¼ï¼");
 	}
 }
 
 function sendMsg( cmd:int, msg:String):void 
-{//·¢ËÍÏûÏ¢
+{//å‘é€æ¶ˆæ¯
 	if (isConn) 
 	{
 		var thisStringBytsLength :ByteArray = new ByteArray();
 	    thisStringBytsLength.writeMultiByte(msg,"utf-8");
 		sendBytesData(cmd, thisStringBytsLength);
-		trace( msg + " ³¤¶È£º " + GetStringLength(msg));
+		trace( msg + " é•¿åº¦ï¼š " + GetStringLength(msg));
 	}
 	else 
 	{
-		mc_page1.incomingChat_txt.htmlText += "<font color='#ff0000' face='ËÎÌå' size='20'>ÄãÒÑ¶Ï¿ªÁ¬½Ó£¬ÇëÖØĞÂÁ¬½Ó£¡£¡£¡</font>"; 
-		trace("Ã»ÓĞÁ¬½ÓÉÏ°¡°¡°¡£¡£¡£¡");
+		mc_page1.incomingChat_txt.htmlText += "<font color='#ff0000' face='å®‹ä½“' size='20'>ä½ å·²æ–­å¼€è¿æ¥ï¼Œè¯·é‡æ–°è¿æ¥ï¼ï¼ï¼</font>"; 
+		trace("æ²¡æœ‰è¿æ¥ä¸Šå•Šå•Šå•Šï¼ï¼ï¼");
 	}
 }
 function onReceiveData(e:ProgressEvent):void
-{//ÊÕµ½ÏûÏ¢
+{//æ”¶åˆ°æ¶ˆæ¯
 	while (socket.bytesAvailable) 
 	{
 		var body_len:int = socket.readInt();
