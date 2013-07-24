@@ -1,4 +1,4 @@
-﻿import ff.SharedStruct;
+﻿import ff.chat_msg_t;
 import ff.FFUtil;
 
 
@@ -76,15 +76,17 @@ function onClose(e:Event):void {
 
 function sendBytesData( cmd:int, byteArray:ByteArray):void 
 {//发送消息
-	var ss1:SharedStruct = new SharedStruct();
-	ss1.key = 10244;
+/*
+	var ss1:chat_msg_t = new chat_msg_t();
+	ss1.value = 'HelloWorld';
 	var ba:ByteArray = new ByteArray();
 	FFUtil.EncodeMsg(ss1, ba);
 	trace("OhNice1:" + ba.length);
-	var ss2:SharedStruct = new SharedStruct();
+	var ss2:chat_msg_t = new chat_msg_t();
 	ba.position = 0;
 	FFUtil.DecodeMsg(ss2, ba);
-	trace("OhNice:" + ss1.key);
+	trace("OhNice:" + ss1.value);
+	*/
 	//MsgToByteArray(SharedStruct);
 	if (isConn) 
 	{
@@ -107,10 +109,23 @@ function sendMsg( cmd:int, msg:String):void
 {//发送消息
 	if (isConn) 
 	{
-		var thisStringBytsLength :ByteArray = new ByteArray();
-	    thisStringBytsLength.writeMultiByte(msg,"utf-8");
-		sendBytesData(cmd, thisStringBytsLength);
-		trace( msg + " 长度： " + GetStringLength(msg));
+		if (cmd == 0)//! login msg
+		{
+			var thisStringBytsLength :ByteArray = new ByteArray();
+	    	thisStringBytsLength.writeMultiByte(msg,"utf-8");
+			sendBytesData(cmd, thisStringBytsLength);
+    		trace( msg + " sendMsg长度： " + GetStringLength(msg) + " cmd:" + cmd);
+		}
+		else
+		{
+			var chat_msg:chat_msg_t = new chat_msg_t();
+			chat_msg.value = msg;
+			var ba:ByteArray = new ByteArray();
+			FFUtil.EncodeMsg(chat_msg, ba);
+			ba.position = 0;
+			sendBytesData(cmd, ba);
+			trace( msg + " sendffMsg长度： " + ba.length + " cmd:" + cmd);
+		}
 	}
 	else 
 	{
@@ -126,8 +141,20 @@ function onReceiveData(e:ProgressEvent):void
 		var command:int =  socket.readShort();
 		var reversed:int = socket.readShort();
 		
-		var msg:String = socket.readUTFBytes(body_len);
-		mc_page1.incomingChat_txt.htmlText += msg; 
+		trace("接受到的cmd:"+command);
+		if (command == 2)
+		{
+			var ba:ByteArray = new ByteArray();
+			socket.readBytes(ba, 0, body_len);
+			var chat_msg:chat_msg_t = new chat_msg_t();
+			FFUtil.DecodeMsg(chat_msg, ba);
+			mc_page1.incomingChat_txt.htmlText += chat_msg.value; 
+		}
+		else
+		{
+			var msg:String = socket.readUTFBytes(body_len);
+			mc_page1.incomingChat_txt.htmlText += msg; 
+		}
 	}
 }
 
@@ -135,7 +162,7 @@ function SendMsg()
 {
 	if (mc_page1.sendChat_txt.text.length>0) 
 	{
-		sendMsg(1, "[\"" + mc_page1.sendChat_txt.text + "\"]");
+		sendMsg(1, mc_page1.sendChat_txt.text);
 	}
 	mc_page1.sendChat_txt.text="";
 }
