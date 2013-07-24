@@ -49,7 +49,6 @@ def session_call(cmd_, protocol_type_ = 'json'):
             g_session_logic_callback_dict[cmd_] = (json_to_value, func_)
         elif hasattr(protocol_type_, 'thrift_spec'):
             def thrift_to_value(val_):
-                print('T'*30, len(val_))
                 dest = protocol_type_()
                 mb2 = TTransport.TMemoryBuffer(val_)
                 bp2 = TBinaryProtocol.TBinaryProtocol(mb2)
@@ -98,7 +97,7 @@ def ff_session_logic(session_id, cmd, body):
     session_id 为client id
     body 为请求的消息
     '''
-    print('ff_session_logic', session_id, cmd, body)
+    #print('ff_session_logic', session_id, cmd, body)
     info = g_session_logic_callback_dict[cmd]
     arg  = info[0](body)
     return info[1](session_id, arg)
@@ -112,7 +111,13 @@ def ff_timer_callback(id):
         return False
 
 def to_str(msg):
-    if hasattr(msg, 'SerializeToString2'):
+    if hasattr(msg, 'thrift_spec'):
+        mb = TTransport.TMemoryBuffer()
+        bp = TBinaryProtocol.TBinaryProtocol(mb)
+        #bp = TCompactProtocol.TCompactProtocol(mb)
+        msg.write(bp)
+        return mb.getvalue()
+    elif hasattr(msg, 'SerializeToString'):
         return msg.SerializeToString()
     elif isinstance(msg, unicode):
         return msg.encode('utf-8')

@@ -41,8 +41,10 @@ def process_chat(session_id, msg):
     print("process_chat session_id=%s content=%s"%(session_id, content))
 
     ret = '<font color="#008000">[%s %s]:</font>%s'%(session_id, GetNowTime(), content)
-    ffext.broadcast_msg_session(1, ret)
-    test_call_scene()
+    ret_msg = chat_msg_t()
+    ret_msg.value = ret
+    ffext.broadcast_msg_session(2, ret_msg)
+
 
 
 #这个修饰器的意思是注册下面函数处理验证client账号密码，
