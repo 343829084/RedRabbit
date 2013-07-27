@@ -94,7 +94,8 @@ public:
         session_key(s_),
         online_time(t_),
         ip(ip_),
-        gate_name(gate_)
+        gate_name(gate_),
+        alloc_session_id(0)
     {}
     virtual int type()
     {
