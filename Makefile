@@ -4,7 +4,7 @@ CP=/bin/cp
 RM=-/bin/rm -rf
 LN=/bin/ln -s 
 CFLAGS=-g  -Wall
-LDFLAGS= -lpthread  -ldl -lpython2.7 -lmysqlclient
+LDFLAGS= -lpthread  -ldl -lpython2.6 -lmysqlclient
 #链接库名
 LIB_NAME=
 #链接库版本
@@ -35,14 +35,15 @@ all:$(BIN)
 $(BIN):$(OBJS)
 	gcc -c fflib/db/sqlite3.c -o sqlite3.o
 	g++ -o $(BIN) $(OBJS) sqlite3.o $(LDFLAGS)  
-	@echo -e " OK!\tCompile $@ "
+	@echo  " OK! Compile $@ "
 # @$(LN) $(shell pwd)/$(LIB_NAME).$(LIB_VER) /lib/$(LIB_NAME)
 
 %.o:%.cpp
-	@echo -e "[$(ARCH)] \t\tCompile $@..."
+	@echo  "[$(ARCH)] Compile $@..."
 	@$(CC) $(CFLAGS)  -c $< -o $@
 
 .PHONY: clean
 clean:
-	@echo -e "[$(ARCH)] \tCleaning files..."
+	@echo  "[$(ARCH)] Cleaning files..."
 	@$(RM) $(OBJS) $(BIN) 
+	@$(RM) sqlite3.o
