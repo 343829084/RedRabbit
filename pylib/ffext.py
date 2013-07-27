@@ -127,11 +127,12 @@ def to_str(msg):
         g_WriteTMemoryBuffer.cstringio_buf.truncate()
         g_WriteTMemoryBuffer.cstringio_buf.seek(0)
         msg.write(g_WriteTBinaryProtocol)
+        return g_WriteTMemoryBuffer.getvalue()
         #mb = TTransport.TMemoryBuffer()
         #bp = TBinaryProtocol.TBinaryProtocol(mb)
         #bp = TCompactProtocol.TCompactProtocol(mb)
         #msg.write(bp)
-        return mb.getvalue()
+        #return mb.getvalue()
     elif hasattr(msg, 'SerializeToString'):
         return msg.SerializeToString()
     elif isinstance(msg, unicode):
