@@ -1,5 +1,7 @@
 #include "base/performance_daemon.h"
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 using namespace ff;
 
 performance_daemon_t::performance_daemon_t():
