@@ -44,7 +44,6 @@ def process_chat(session_id, msg):
     ret_msg = chat_msg_t()
     ret_msg.value = ret
     ffext.broadcast_msg_session(2, ret_msg)
-    ffext.broadcast_msg_session(2, ret_msg)
 
 
 
@@ -52,7 +51,7 @@ def process_chat(session_id, msg):
 #session_key为账号密码组合体，client第一个包必为登陆包
 @ffext.session_verify_callback
 def my_session_verify(session_key, online_time, ip, gate_name):
-    return [session_key]#需要返回数组，验证成功，第一个元素为分配的id，
+    return [str(ffext.alloc_id())]#需要返回数组，验证成功，第一个元素为分配的id，
 						#第二个元素可以不设置，若设置gate会返回给client，login gate的时候
 						#需要第二个元素返回分配的game gate
 
