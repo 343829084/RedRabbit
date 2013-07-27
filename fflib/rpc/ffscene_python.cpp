@@ -1,6 +1,7 @@
 
 #include "python/ffpython.h"
 #include "rpc/ffscene_python.h"
+#include "base/performance_daemon.h"
 using namespace ff;
 
 ffscene_python_t::ffscene_python_t()
@@ -67,6 +68,7 @@ int ffscene_python_t::close()
 
 string ffscene_python_t::reload(const string& name_)
 {
+    AUTO_PERF();
     LOGTRACE((FFSCENE_PYTHON, "ffscene_python_t::reload begin name_[%s]", name_));
     try
     {
@@ -98,6 +100,7 @@ ffslot_t::callback_t* ffscene_python_t::gen_verify_callback()
         lambda_cb(ffscene_python_t* p):ffscene(p){}
         virtual void exe(ffslot_t::callback_arg_t* args_)
         {
+            PERF("verify_callback");
             if (args_->type() != TYPEID(session_verify_arg))
             {
                 return;
@@ -136,6 +139,7 @@ ffslot_t::callback_t* ffscene_python_t::gen_enter_callback()
         lambda_cb(ffscene_python_t* p):ffscene(p){}
         virtual void exe(ffslot_t::callback_arg_t* args_)
         {
+            PERF("enter_callback");
             if (args_->type() != TYPEID(session_enter_arg))
             {
                 return;
@@ -166,6 +170,7 @@ ffslot_t::callback_t* ffscene_python_t::gen_offline_callback()
         lambda_cb(ffscene_python_t* p):ffscene(p){}
         virtual void exe(ffslot_t::callback_arg_t* args_)
         {
+            PERF("offline_callback");
             if (args_->type() != TYPEID(session_offline_arg))
             {
                 return;
@@ -201,6 +206,8 @@ ffslot_t::callback_t* ffscene_python_t::gen_logic_callback()
             logic_msg_arg* data = (logic_msg_arg*)args_;
             static string func_name  = LOGIC_CB_NAME;
             LOGINFO((FFSCENE_PYTHON, "ffscene_python_t::gen_logic_callback len[%lu]", data->body.size()));
+            
+            AUTO_CMD_PERF("logic_callback", data->cmd);
             try
             {
                 ffscene->get_ffpython().call<void>(ffscene->m_ext_name, func_name,
@@ -231,6 +238,8 @@ ffslot_t::callback_t* ffscene_python_t::gen_scene_call_callback()
             scene_call_msg_arg* data = (scene_call_msg_arg*)args_;
             static string func_name  = SCENE_CALL_CB_NAME;
             LOGINFO((FFSCENE_PYTHON, "ffscene_python_t::gen_scene_call_callback len[%lu]", data->body.size()));
+            
+            AUTO_CMD_PERF("scene_callback", data->cmd);
             try
             {
                 vector<string> ret = ffscene->get_ffpython().call<vector<string> >(ffscene->m_ext_name, func_name,
@@ -262,6 +271,7 @@ int ffscene_python_t::once_timer(int timeout_, uint64_t id_)
         {
             LOGTRACE((FFSCENE_PYTHON, "ffscene_python_t::once_timer call_py id<%u>", id));
             static string func_name  = TIMER_CB_NAME;
+            PERF("once_timer");
             try
             {
                 ffscene->get_ffpython().call<void>(ffscene->m_ext_name, func_name, id);
@@ -300,6 +310,7 @@ ffslot_t::callback_t* ffscene_python_t::gen_db_query_callback(long callback_id_)
         static void call_python(ffscene_python_t* ffscene, long callback_id_,
                                 bool ok, const vector<vector<string> >& ret_, const vector<string>& col_)
         {
+            PERF("db_query_callback");
             static string func_name   = DB_QUERY_CB_NAME;
             try
             {
@@ -344,6 +355,7 @@ void ffscene_python_t::bridge_call_service(const string& group_name_, const stri
 }
 void ffscene_python_t::call_service_return_msg(ffreq_t<scene_call_msg_t::out_t>& req_, long id_)
 {
+    AUTO_PERF();
     static string func_name   = CALL_SERVICE_RETURN_MSG_CB_NAME;
     try
     {

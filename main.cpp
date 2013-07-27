@@ -11,6 +11,7 @@
 #include "rpc/ffgate.h"
 #include "base/signal_helper.h"
 #include "base/daemon_tool.h"
+#include "base/performance_daemon.h"
 
 using namespace ff;
 //./app_redrabbit -gate gate@0 -broker tcp://127.0.0.1:10241 -gate_listen tcp://121.199.21.238:10242 -python_path ./ -scene scene@0
@@ -39,6 +40,20 @@ int main(int argc, char* argv[])
     else
     {
         LOG.start("-log_path ./log -log_filename log -log_class DB_MGR,XX,BROKER,FFRPC,FFGATE,FFSCENE,FFSCENE_PYTHON,FFNET -log_print_screen true -log_print_file true -log_level 6");
+    }
+    string perf_path = "./perf";
+    long perf_timeout = 30*60;//! second
+    if (arg_helper.is_enable_option("-perf_path"))
+    {
+        perf_path = arg_helper.get_option_value("-perf_path");
+    }
+    if (arg_helper.is_enable_option("-perf_timeout"))
+    {
+        perf_timeout = ::atoi(arg_helper.get_option_value("-perf_timeout").c_str());
+    }
+    if (PERF_MONITOR.start(perf_path, perf_timeout))
+    {
+        return -1;
     }
     ffbroker_t ffbroker;
     ffgate_t ffgate;
