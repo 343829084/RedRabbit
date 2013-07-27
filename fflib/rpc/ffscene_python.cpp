@@ -44,7 +44,8 @@ int ffscene_python_t::open(arg_helper_t& arg_helper)
 
 
     (*m_ffpython).reg(&ffdb_t::escape, "escape")
-                 .reg(&ffscene_python_t::py_send_msg_session, "py_send_msg_session");
+                 .reg(&ffscene_python_t::py_send_msg_session, "py_send_msg_session")
+                 .reg(&ffscene_python_t::py_broadcast_msg_session, "py_broadcast_msg_session");
 
     (*m_ffpython).init("ff");
     (*m_ffpython).set_global_var("ff", "ffscene_obj", (ffscene_python_t*)this);
