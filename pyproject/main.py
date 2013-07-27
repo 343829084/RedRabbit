@@ -44,6 +44,7 @@ def process_chat(session_id, msg):
     ret_msg = chat_msg_t()
     ret_msg.value = ret
     ffext.broadcast_msg_session(2, ret_msg)
+    ffext.broadcast_msg_session(2, ret_msg)
 
 
 
