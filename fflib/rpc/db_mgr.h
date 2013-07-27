@@ -31,6 +31,7 @@ public:
 
     long connect_db(const string& host_);
     void db_query(long db_id_,const string& sql_, ffslot_t::callback_t* callback_);
+    int  sync_db_query(long db_id_,const string& sql_, vector<vector<string> >& ret_data_);
 
     void db_query_impl(db_connection_info_t* db_connection_info_, const string& sql_, ffslot_t::callback_t* callback_);
 private:

@@ -350,6 +350,12 @@ void ffscene_python_t::db_query(long db_id_,const string& sql_, long callback_id
 {
     m_db_mgr.db_query(db_id_, sql_, gen_db_query_callback(callback_id_));
 }
+vector<vector<string> > ffscene_python_t::sync_db_query(long db_id_,const string& sql_, long callback_id_)
+{
+    vector<vector<string> > ret;
+    m_db_mgr.sync_db_query(db_id_, sql_, ret);
+    return ret;
+}
 void ffscene_python_t::call_service(const string& name_, long cmd_, const string& msg_, long id_)
 {
     scene_call_msg_t::in_t inmsg;

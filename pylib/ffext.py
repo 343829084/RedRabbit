@@ -189,6 +189,9 @@ class ffdb_t(object):
         DB_CALLBACK_ID += 1
         DB_CALLBACK_DICT[DB_CALLBACK_ID] = callback_
         ff.ffscene_obj.db_query(self.db_id, sql_, DB_CALLBACK_ID)
+    def sync_db_query(self, sql_):
+        ret = ff.ffscene_obj.db_query(self.db_id, sql_)
+        return query_result_t(True, ret, [])
 #封装query返回的结果
 class query_result_t(object):
     flag   = False

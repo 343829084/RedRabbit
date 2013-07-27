@@ -1,5 +1,6 @@
 
 #include "rpc/db_mgr.h"
+#include "base/performance_daemon.h"
 using namespace ff;
 
 #define DB_MGR "DB_MGR"
@@ -70,8 +71,33 @@ void db_mgr_t::db_query(long db_id_,const string& sql_, ffslot_t::callback_t* ca
     }
 }
 
+int db_mgr_t::sync_db_query(long db_id_,const string& sql_, vector<vector<string> >& ret_data_)
+{
+    AUTO_PERF();
+    db_connection_info_t* db_connection_info = NULL;
+    {
+        lock_guard_t lock(m_mutex);
+        db_connection_info = &(m_db_connection[db_id_]);
+    }
+    if (NULL == db_connection_info)
+    {
+        return -1;
+    }
+    db_connection_info->ret.clear();
+    if (0 == db_connection_info->db->exe_sql(sql_, ret_data_, db_connection_info->ret.col_names))
+    {
+        db_connection_info->ret.ok = true;
+    }
+    else
+    {
+        LOGERROR((DB_MGR, "db_mgr_t::sync_db_query failed<%s>, while sql<%s>", db_connection_info->db->error_msg(), sql_));
+        return -1;
+    }
+    return 0;
+}
 void db_mgr_t::db_query_impl(db_connection_info_t* db_connection_info_, const string& sql_, ffslot_t::callback_t* callback_)
 {
+    AUTO_PERF();
     db_connection_info_->ret.clear();
     if (0 == db_connection_info_->db->exe_sql(sql_, db_connection_info_->ret.result_data, db_connection_info_->ret.col_names))
     {
