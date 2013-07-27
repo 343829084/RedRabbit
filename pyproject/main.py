@@ -77,15 +77,21 @@ def my_session_enter(session_id, from_scene, extra_data):
     ffext.broadcast_msg_session(1, '<font color="#ff0000">当前在线:</font>')
     ffext.broadcast_msg_session(1, ffext.singleton(player_mgr_t).idlist())
 
+
 print("loading.......")
 
 #数据库操作示例
 def sqlite_test():
     db = ffext.ffdb_create('sqlite://./test.db')
-    db.query('CREATE TABLE  IF NOT EXISTS dumy (A int, c float, b varchar(200), primary key (A))')
-    db.query('insert into dumy values(1, 2.3, "ttttTTccc")')
     def cb(ret):
         print(ret.flag, ret.result, ret.column, ffext.DB_CALLBACK_DICT)
+
+    ret = db.sync_query('select * from dumy')#cb 为异步回调函数
+    cb(ret)
+
+    db.query('CREATE TABLE  IF NOT EXISTS dumy (A int, c float, b varchar(200), primary key (A))')
+    db.query('insert into dumy values(1, 2.3, "ttttTTccc")')
+    
     db.query('select * from dumy', cb)#cb 为异步回调函数
     ffext.reload('main')#重载此脚本
 
