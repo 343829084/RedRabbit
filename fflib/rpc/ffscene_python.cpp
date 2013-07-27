@@ -14,6 +14,14 @@ ffscene_python_t::~ffscene_python_t()
     m_ffpython = NULL;
 }
 
+void ffscene_python_t::py_send_msg_session(const string& session_id_, uint16_t cmd_, const string& data_)
+{
+    singleton_t<ffscene_python_t>::instance().send_msg_session(session_id_, cmd_, data_);
+}
+void ffscene_python_t::py_broadcast_msg_session(uint16_t cmd_, const string& data_)
+{
+    singleton_t<ffscene_python_t>::instance().broadcast_msg_session(cmd_, data_);
+}
 int ffscene_python_t::open(arg_helper_t& arg_helper)
 {
     LOGTRACE((FFSCENE_PYTHON, "ffscene_python_t::open begin"));
@@ -34,7 +42,9 @@ int ffscene_python_t::open(arg_helper_t& arg_helper)
               .reg(&ffscene_python_t::call_service, "call_service")
               .reg(&ffscene_python_t::bridge_call_service, "bridge_call_service");
 
-    (*m_ffpython).reg(&ffdb_t::escape, "escape");
+
+    (*m_ffpython).reg(&ffdb_t::escape, "escape")
+                 .reg(&ffscene_python_t::py_send_msg_session, "py_send_msg_session");
 
     (*m_ffpython).init("ff");
     (*m_ffpython).set_global_var("ff", "ffscene_obj", (ffscene_python_t*)this);

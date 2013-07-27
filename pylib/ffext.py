@@ -143,10 +143,12 @@ def to_str(msg):
         return json.dumps(msg, ensure_ascii=False)
 
 def send_msg_session(session_id, cmd_, body):
+    return ff.py_send_msg_session(session_id, cmd_, to_str(body))
     ff.ffscene_obj.send_msg_session(session_id, cmd_, to_str(body))
 def multi_send_msg_session(session_id_list, cmd_, body):
     return ff.ffscene_obj.multicast_msg_session(session_id_list, cmd_, to_str(body))
 def broadcast_msg_session(cmd_, body):
+    return ff.broadcast_msg_session(cmd_, to_str(body))
     return ff.ffscene_obj.broadcast_msg_session(cmd_, to_str(body))
 def broadcast_msg_gate(gate_name_, cmd_, body):
     return ff.ffscene_obj.broadcast_msg_gate(gate_name_, cmd_, body)

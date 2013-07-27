@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
     }
     ffbroker_t ffbroker;
     ffgate_t ffgate;
-    ffscene_python_t ffscene_python;
+    //ffscene_python_t ffscene_python;
 
     try
     {
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
         }
         if (arg_helper.is_enable_option("-scene"))
         {
-            if (ffscene_python.open(arg_helper))
+            if (singleton_t<ffscene_python_t>::instance().open(arg_helper))
             {
                 printf("scene open error!\n");
                 return -1;
@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
     signal_helper_t::wait();
 
     ffgate.close();
-    ffscene_python.close();
+    singleton_t<ffscene_python_t>::instance().close();
     ffbroker.close();
     net_factory_t::stop();
     usleep(500);
