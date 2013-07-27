@@ -119,7 +119,7 @@ def ff_timer_callback(id):
         return False
 
 g_WriteTMemoryBuffer   = TTransport.TMemoryBuffer()
-g_WriteTBinaryProtocol = TBinaryProtocol.TBinaryProtocol(g_g_WriteTMemoryBuffer)
+g_WriteTBinaryProtocol = TBinaryProtocol.TBinaryProtocol(g_WriteTMemoryBuffer)
 
 def to_str(msg):
     if hasattr(msg, 'thrift_spec'):
