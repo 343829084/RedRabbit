@@ -57,6 +57,7 @@ def session_call(cmd_, protocol_type_ = 'json'):
                 g_ReadTMemoryBuffer.cstringio_buf.truncate()
                 g_ReadTMemoryBuffer.cstringio_buf.seek(0)
                 g_ReadTMemoryBuffer.cstringio_buf.write(val_)
+                g_ReadTMemoryBuffer.cstringio_buf.seek(0)
                 dest.read(g_ReadTBinaryProtocol);
                 #mb2 = TTransport.TMemoryBuffer(val_)
                 #bp2 = TBinaryProtocol.TBinaryProtocol(mb2)
