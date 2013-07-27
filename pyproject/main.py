@@ -38,7 +38,7 @@ def process_chat(session_id, msg):
                                        '%s</font></b>'%(str(ret)))
         return
 
-    print("process_chat session_id=%s content=%s"%(session_id, content))
+    #print("process_chat session_id=%s content=%s"%(session_id, content))
 
     ret = '<font color="#008000">[%s %s]:</font>%s'%(session_id, GetNowTime(), content)
     ret_msg = chat_msg_t()
