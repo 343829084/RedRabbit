@@ -84,7 +84,7 @@ struct ffgate_t::session_data_t
     }
     bool is_valid()
     {
-        return 0 == session_id;
+        return 0 != session_id;
     }
     const userid_t& id() const        { return session_id;    }
     void set_id(const userid_t& s_)   { session_id = s_;      }
