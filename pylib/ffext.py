@@ -42,6 +42,9 @@ def protobuf_to_value(msg_type_, val_):
     dest.ParseFromString(val_)
     return dest
 
+g_ReadTMemoryBuffer   = TTransport.TMemoryBuffer()
+g_ReadTBinaryProtocol = TBinaryProtocol.TBinaryProtocol(g_ReadTMemoryBuffer)
+
 def session_call(cmd_, protocol_type_ = 'json'):
     global g_session_logic_callback_dict
     def session_logic_callback(func_):
@@ -50,9 +53,13 @@ def session_call(cmd_, protocol_type_ = 'json'):
         elif hasattr(protocol_type_, 'thrift_spec'):
             def thrift_to_value(val_):
                 dest = protocol_type_()
-                mb2 = TTransport.TMemoryBuffer(val_)
-                bp2 = TBinaryProtocol.TBinaryProtocol(mb2)
-                dest.read(bp2);
+                global g_ReadTMemoryBuffer, g_ReadTBinaryProtocol
+                g_ReadTMemoryBuffer.cstringio_buf.truncate()
+                g_ReadTMemoryBuffer.cstringio_buf.write(val_)
+                dest.read(g_ReadTBinaryProtocol);
+                #mb2 = TTransport.TMemoryBuffer(val_)
+                #bp2 = TBinaryProtocol.TBinaryProtocol(mb2)
+                #dest.read(bp2);
                 return dest
             g_session_logic_callback_dict[cmd_] = (thrift_to_value, func_)
         else: #protobuf
