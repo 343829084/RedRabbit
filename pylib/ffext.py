@@ -56,7 +56,7 @@ def session_call(cmd_, protocol_type_ = 'json'):
                 global g_ReadTMemoryBuffer, g_ReadTBinaryProtocol
                 g_ReadTMemoryBuffer.cstringio_buf.truncate()
                 g_ReadTMemoryBuffer.cstringio_buf.write(val_)
-                g_ReadTMemoryBuffer.cstringio_buf.seek(0);
+                g_ReadTMemoryBuffer.cstringio_buf.seek(0)
                 dest.read(g_ReadTBinaryProtocol);
                 #mb2 = TTransport.TMemoryBuffer(val_)
                 #bp2 = TBinaryProtocol.TBinaryProtocol(mb2)
@@ -118,12 +118,19 @@ def ff_timer_callback(id):
     except:
         return False
 
+g_WriteTMemoryBuffer   = TTransport.TMemoryBuffer()
+g_WriteTBinaryProtocol = TBinaryProtocol.TBinaryProtocol(g_g_WriteTMemoryBuffer)
+
 def to_str(msg):
     if hasattr(msg, 'thrift_spec'):
-        mb = TTransport.TMemoryBuffer()
-        bp = TBinaryProtocol.TBinaryProtocol(mb)
+        global g_WriteTMemoryBuffer, g_WriteTBinaryProtocol
+        g_WriteTMemoryBuffer.cstringio_buf.truncate()
+        g_WriteTMemoryBuffer.cstringio_buf.seek(0)
+        msg.write(g_WriteTBinaryProtocol)
+        #mb = TTransport.TMemoryBuffer()
+        #bp = TBinaryProtocol.TBinaryProtocol(mb)
         #bp = TCompactProtocol.TCompactProtocol(mb)
-        msg.write(bp)
+        #msg.write(bp)
         return mb.getvalue()
     elif hasattr(msg, 'SerializeToString'):
         return msg.SerializeToString()
