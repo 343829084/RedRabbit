@@ -95,9 +95,46 @@ string ffscene_python_t::reload(const string& name_)
     return "";
 }
 
-void ffscene_python_t::pylog(const string& mod_, const string& content_)
+void ffscene_python_t::pylog(int level_, const string& mod_, const string& content_)
 {
-    LOGTRACE((mod_.c_str(), "%s", content_));
+    switch (level_)
+    {
+        case 1:
+        {
+            LOGFATAL((mod_.c_str(), "%s", content_));
+        }
+        break;
+        case 2:
+        {
+            LOGERROR((mod_.c_str(), "%s", content_));
+        }
+        break;
+        case 3:
+        {
+            LOGWARN((mod_.c_str(), "%s", content_));
+        }
+        break;
+        case 4:
+        {
+            LOGINFO((mod_.c_str(), "%s", content_));
+        }
+        break;
+        case 5:
+        {
+            LOGDEBUG((mod_.c_str(), "%s", content_));
+        }
+        break;
+        case 6:
+        {
+            LOGTRACE((mod_.c_str(), "%s", content_));
+        }
+        break;
+        default:
+        {
+            LOGTRACE((mod_.c_str(), "%s", content_));
+        }
+        break;
+    }
 }
 //! 判断某个service是否存在
 bool ffscene_python_t::is_exist(const string& service_name_)

@@ -34,7 +34,7 @@ public:
     int open(arg_helper_t& arg_helper);
     int close();
     string reload(const string& name_);
-    void pylog(const string& mod_, const string& content_);
+    void pylog(int level, const string& mod_, const string& content_);
     //! 判断某个service是否存在
     bool is_exist(const string& service_name_);
     ffslot_t::callback_t* gen_verify_callback();

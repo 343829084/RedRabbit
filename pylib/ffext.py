@@ -299,7 +299,7 @@ class mystdout_t(object):
     def write(self, x):
         if x == '\n':
             return 1
-        ff.ffscene_obj.pylog('FFSCENE_PYTHON', x)
+        ff.ffscene_obj.pylog(6, 'FFSCENE_PYTHON', x)
         return len(x)
 def dump_stdout_to_log():
     save_stdout = sys.stdout
@@ -311,3 +311,18 @@ def alloc_id():
     global G_ALLOC_ID
     G_ALLOC_ID += 1
     return G_ALLOC_ID
+
+
+#日志相关的接口
+def LOGTRACE(mod_, content_):
+    return ff.ffscene_obj.pylog(6, mod_, content_)
+def LOGDEBUG(mod_, content_):
+    return ff.ffscene_obj.pylog(5, mod_, content_)
+def LOGINFO(mod_, content_):
+    return ff.ffscene_obj.pylog(4, mod_, content_)
+def LOGWARN(mod_, content_):
+    return ff.ffscene_obj.pylog(3, mod_, content_)
+def LOGERROR(mod_, content_):
+    return ff.ffscene_obj.pylog(2, mod_, content_)
+def LOGFATAL(mod_, content_):
+    return ff.ffscene_obj.pylog(2, mod_, content_)
