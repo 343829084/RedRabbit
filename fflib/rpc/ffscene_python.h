@@ -53,7 +53,7 @@ public:
     //! 创建数据库连接
     long connect_db(const string& host_);
     void db_query(long db_id_,const string& sql_, long callback_id_);
-    vector<vector<string> > sync_db_query(long db_id_,const string& sql_, long callback_id_);
+    vector<vector<string> > sync_db_query(long db_id_,const string& sql_);
     void call_service(const string& name_, long cmd_, const string& msg_, long id_);
     void bridge_call_service(const string& group_name_, const string& name_, long cmd_, const string& msg_, long id_);
     void call_service_return_msg(ffreq_t<scene_call_msg_t::out_t>& req_, long id_);

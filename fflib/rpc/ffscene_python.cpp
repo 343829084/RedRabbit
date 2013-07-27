@@ -39,6 +39,7 @@ int ffscene_python_t::open(arg_helper_t& arg_helper)
               .reg(&ffscene_python_t::is_exist, "is_exist")
               .reg(&ffscene_python_t::connect_db, "connect_db")
               .reg(&ffscene_python_t::db_query, "db_query")
+              .reg(&ffscene_python_t::sync_db_query, "sync_db_query")
               .reg(&ffscene_python_t::call_service, "call_service")
               .reg(&ffscene_python_t::bridge_call_service, "bridge_call_service");
 
@@ -350,7 +351,7 @@ void ffscene_python_t::db_query(long db_id_,const string& sql_, long callback_id
 {
     m_db_mgr.db_query(db_id_, sql_, gen_db_query_callback(callback_id_));
 }
-vector<vector<string> > ffscene_python_t::sync_db_query(long db_id_,const string& sql_, long callback_id_)
+vector<vector<string> > ffscene_python_t::sync_db_query(long db_id_,const string& sql_)
 {
     vector<vector<string> > ret;
     m_db_mgr.sync_db_query(db_id_, sql_, ret);
