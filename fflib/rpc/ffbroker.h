@@ -16,11 +16,13 @@ using namespace std;
 #include "net/net_factory.h"
 #include "rpc/ffrpc_ops.h"
 #include "base/arg_helper.h"
+#include "rpc/ffbroker_bridge.h"
 
 namespace ff
 {
 class ffbroker_t: public msg_handler_i
 {
+public:
     //! 每个连接都要分配一个session，用于记录该socket，对应的信息s
     struct session_data_t;
     //! 记录每个broker slave 的接口信息
@@ -57,7 +59,8 @@ public:
     int route_msg_to_broker_client(broker_route_t::in_t& msg_);
     //! 内存间传递消息
     int memory_route_msg(broker_route_t::in_t& msg_);
-private:
+
+public:
     //! 当有连接断开，则被回调
     int handle_broken_impl(socket_ptr_t sock_);
     //! 当有消息到来，被回调
@@ -87,17 +90,10 @@ private:
     //! 这里是broker master 发给 broker bridge 的消息
     int handle_broker_to_bridge_route_msg(broker_route_to_bridge_t::in_t& msg_, socket_ptr_t sock_);
     pair<string, socket_ptr_t> get_broker_group_name_by_id(uint32_t id_);
-    //! 处理broker bridge 转发给broker master的消息
-    int handle_bridge_to_broker_route_msg(bridge_route_to_broker_t::in_t& msg_, socket_ptr_t sock_);
-    //! [3] bridge的处理函数，从broker master转发到另外的broker master
-    int bridge_handle_broker_to_broker_msg(bridge_route_to_broker_t::in_t& msg_, socket_ptr_t sock_);
 
-    
-    //! 处理broker master 注册到broker bridge
-    int handle_broker_register_bridge(register_bridge_broker_t::in_t& msg_, socket_ptr_t sock_);
-    //! 处理bridge 同步消息
-    int handle_bridge_sync_data(register_bridge_broker_t::out_t& msg_, socket_ptr_t sock_);
-private:
+
+    ffbroker_bridge_t& get_ffbroker_bridge() { return m_ffbroker_bridge; }
+public:
     //! 分配broker slave的索引id
     uint32_t                                m_alloc_slave_broker_index;
     //! 本 broker的监听信息
@@ -127,6 +123,9 @@ private:
     map<uint32_t/*broker bridge id*/, broker_bridge_info_t> m_broker_bridge_info;
     //! broker bridge 上所有的 broker master group 信息
     map<string/*group name*/, broker_group_info_t>          m_broker_group_info;
+    
+    //! broker bridge包含的数据和操作
+    ffbroker_bridge_t                       m_ffbroker_bridge;
 };
 
 //! 每个连接都要分配一个session，用于记录该socket，对应的信息
