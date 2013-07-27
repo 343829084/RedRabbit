@@ -54,17 +54,17 @@ public:
     callback_info_t& callback_info();
     
     //! 发送消息给特定的client
-    int send_msg_session(const string& session_id_, uint16_t cmd_, const string& data_);
+    int send_msg_session(const userid_t& session_id_, uint16_t cmd_, const string& data_);
     //! 多播
-    int multicast_msg_session(const vector<string>& session_id_, uint16_t cmd_, const string& data_);
+    int multicast_msg_session(const vector<userid_t>& session_id_, uint16_t cmd_, const string& data_);
     //! 广播
     int broadcast_msg_session(uint16_t cmd_, const string& data_);
     //! 广播 整个gate
     int broadcast_msg_gate(const string& gate_name_, uint16_t cmd_, const string& data_);
     //! 关闭某个session
-    int close_session(const string& session_id_);
+    int close_session(const userid_t& session_id_);
     //! 切换scene
-    int change_session_scene(const string& session_id_, const string& to_scene_, const string& extra_data);
+    int change_session_scene(const userid_t& session_id_, const string& to_scene_, const string& extra_data);
 
     ffrpc_t& get_rpc() { return *m_ffrpc; }
 private:
@@ -82,7 +82,7 @@ protected:
     string                                      m_logic_name;
     shared_ptr_t<ffrpc_t>                       m_ffrpc;
     callback_info_t                             m_callback_info;
-    map<string/*sessionid*/, session_info_t>    m_session_info;
+    map<userid_t/*sessionid*/, session_info_t>    m_session_info;
 };
 
 
@@ -106,7 +106,7 @@ public:
     string          gate_name;
 
     //! 验证后的sessionid
-    string          alloc_session_id;
+    userid_t         alloc_session_id;
     //! 需要额外的返回给client的消息内容
     string          extra_data;
 };
@@ -114,7 +114,7 @@ public:
 class ffscene_t::session_enter_arg: public ffslot_t::callback_arg_t
 {
 public:
-    session_enter_arg(const string& s_, const string& from_, const string& to_, const string& data_):
+    session_enter_arg(const userid_t& s_, const string& from_, const string& to_, const string& data_):
         session_id(s_),
         from_scene(from_),
         to_scene(to_),
@@ -124,7 +124,7 @@ public:
     {
         return TYPEID(session_enter_arg);
     }
-    string    session_id;//! 包含用户id
+    userid_t    session_id;//! 包含用户id
     string    from_scene;//! 从哪个scene跳转过来,若是第一次上线，from_scene为空
     string    to_scene;//! 跳到哪个scene上面去,若是下线，to_scene为空
     string    extra_data;//! 附带数据
@@ -132,7 +132,7 @@ public:
 class ffscene_t::session_offline_arg: public ffslot_t::callback_arg_t
 {
 public:
-    session_offline_arg(const string& s_, int64_t t_):
+    session_offline_arg(const userid_t& s_, int64_t t_):
         session_id(s_),
         online_time(t_)
     {}
@@ -140,13 +140,13 @@ public:
     {
         return TYPEID(session_offline_arg);
     }
-    string          session_id;
+    userid_t          session_id;
     int64_t         online_time;
 };
 class ffscene_t::logic_msg_arg: public ffslot_t::callback_arg_t
 {
 public:
-    logic_msg_arg(const string& s_, uint16_t cmd_, const string& t_):
+    logic_msg_arg(const userid_t& s_, uint16_t cmd_, const string& t_):
         session_id(s_),
         cmd(cmd_),
         body(t_)
@@ -155,7 +155,7 @@ public:
     {
         return TYPEID(logic_msg_arg);
     }
-    string          session_id;
+    userid_t          session_id;
     uint16_t        cmd;
     string          body;
 };

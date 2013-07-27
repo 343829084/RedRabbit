@@ -301,3 +301,10 @@ class mystdout_t(object):
 def dump_stdout_to_log():
     save_stdout = sys.stdout
     sys.stdout = mystdout_t()
+
+#分配id
+G_ALLOC_ID = 0
+def alloc_id():
+    global G_ALLOC_ID
+    G_ALLOC_ID += 1
+    return G_ALLOC_ID

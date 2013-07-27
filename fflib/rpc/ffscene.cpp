@@ -132,13 +132,13 @@ ffscene_t::callback_info_t& ffscene_t::callback_info()
 }
 
 //! 发送消息给特定的client
-int ffscene_t::send_msg_session(const string& session_id_, uint16_t cmd_, const string& data_)
+int ffscene_t::send_msg_session(const userid_t& session_id_, uint16_t cmd_, const string& data_)
 {
-    LOGTRACE((FFSCENE, "ffscene_t::send_msg_session begin session_id_<%s>", session_id_));
-    map<string/*sessionid*/, session_info_t>::iterator it = m_session_info.find(session_id_);
+    LOGTRACE((FFSCENE, "ffscene_t::send_msg_session begin session_id_<%ld>", session_id_));
+    map<userid_t/*sessionid*/, session_info_t>::iterator it = m_session_info.find(session_id_);
     if (it == m_session_info.end())
     {
-        LOGWARN((FFSCENE, "ffscene_t::send_msg_session no session id[%s]", session_id_));
+        LOGWARN((FFSCENE, "ffscene_t::send_msg_session no session id[%ld]", session_id_));
         return -1;
     }
     gate_route_msg_to_session_t::in_t msg;
@@ -150,9 +150,9 @@ int ffscene_t::send_msg_session(const string& session_id_, uint16_t cmd_, const 
     return 0;
 }
 //! 多播
-int ffscene_t::multicast_msg_session(const vector<string>& session_id_, uint16_t cmd_, const string& data_)
+int ffscene_t::multicast_msg_session(const vector<userid_t>& session_id_, uint16_t cmd_, const string& data_)
 {
-    vector<string>::const_iterator it = session_id_.begin();
+    vector<userid_t>::const_iterator it = session_id_.begin();
     for (; it != session_id_.end(); ++it)
     {
         send_msg_session(*it, cmd_, data_);
@@ -162,7 +162,7 @@ int ffscene_t::multicast_msg_session(const vector<string>& session_id_, uint16_t
 //! 广播
 int ffscene_t::broadcast_msg_session(uint16_t cmd_, const string& data_)
 {
-    map<string/*sessionid*/, session_info_t>::iterator it = m_session_info.begin();
+    map<userid_t/*sessionid*/, session_info_t>::iterator it = m_session_info.begin();
     for (; it != m_session_info.end(); ++it)
     {
         gate_route_msg_to_session_t::in_t msg;
@@ -183,12 +183,12 @@ int ffscene_t::broadcast_msg_gate(const string& gate_name_, uint16_t cmd_, const
     return 0;
 }
 //! 关闭某个session
-int ffscene_t::close_session(const string& session_id_)
+int ffscene_t::close_session(const userid_t& session_id_)
 {
-    map<string/*sessionid*/, session_info_t>::iterator it = m_session_info.find(session_id_);
+    map<userid_t/*sessionid*/, session_info_t>::iterator it = m_session_info.find(session_id_);
     if (it == m_session_info.end())
     {
-        LOGWARN((FFSCENE, "ffscene_t::send_msg_session no session id[%s]", session_id_));
+        LOGWARN((FFSCENE, "ffscene_t::send_msg_session no session id[%ld]", session_id_));
         return -1;
     }
     
@@ -199,12 +199,12 @@ int ffscene_t::close_session(const string& session_id_)
     return 0;
 }
 //! 切换scene
-int ffscene_t::change_session_scene(const string& session_id_, const string& to_scene_, const string& extra_data_)
+int ffscene_t::change_session_scene(const userid_t& session_id_, const string& to_scene_, const string& extra_data_)
 {
-    map<string/*sessionid*/, session_info_t>::iterator it = m_session_info.find(session_id_);
+    map<userid_t/*sessionid*/, session_info_t>::iterator it = m_session_info.find(session_id_);
     if (it == m_session_info.end())
     {
-        LOGWARN((FFSCENE, "ffscene_t::change_session_scene no session id[%s]", session_id_));
+        LOGWARN((FFSCENE, "ffscene_t::change_session_scene no session id[%ld]", session_id_));
         return -1;
     }
     

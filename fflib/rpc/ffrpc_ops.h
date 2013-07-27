@@ -621,7 +621,7 @@ struct session_verify_t
         {
             decoder() >> session_id >> err >> extra_data;
         }
-        string session_id;//! 分配的sessionid
+        userid_t session_id;//! 分配的sessionid
         string err;//! 错误信息
         //! 需要额外的返回给client的消息内容
         string          extra_data;
@@ -640,7 +640,7 @@ struct session_enter_scene_t
         {
             decoder() >> session_id >> from_gate >> from_scene >> to_scene >> extra_data;
         }
-        string    session_id;//! 包含用户id
+        userid_t    session_id;//! 包含用户id
         string    from_gate;
         string    from_scene;//! 从哪个scene跳转过来,若是第一次上线，from_scene为空
         string    to_scene;//! 跳到哪个scene上面去,若是下线，to_scene为空
@@ -672,7 +672,7 @@ struct session_offline_t
         {
             decoder() >> session_id >> online_time;
         }
-        string    session_id;//! 包含用户id
+        userid_t    session_id;//! 包含用户id
         int64_t   online_time;
     };
     struct out_t: public ffmsg_t<out_t>
@@ -701,7 +701,7 @@ struct route_logic_msg_t
         {
             decoder() >> session_id >> cmd >> body;
         }
-        string session_id;//! 包含用户id
+        userid_t session_id;//! 包含用户id
         uint16_t cmd;
         string body;
     };
@@ -730,7 +730,7 @@ struct gate_change_logic_node_t
         {
             decoder() >> session_id >> alloc_logic_service >> extra_data;
         }
-        string session_id;//! 包含用户id
+        userid_t session_id;//! 包含用户id
         string alloc_logic_service;//! 分配的logic service
         string extra_data;
     };
@@ -760,7 +760,7 @@ struct gate_close_session_t
         {
             decoder() >> session_id;
         }
-        string session_id;//! 包含用户id
+        userid_t session_id;//! 包含用户id
     };
     struct out_t: public ffmsg_t<out_t>
     {
@@ -787,7 +787,7 @@ struct gate_route_msg_to_session_t
         {
             decoder() >> session_id >> cmd >> body;
         }
-        vector<string>  session_id;//! 包含用户id
+        vector<userid_t>  session_id;//! 包含用户id
         uint16_t        cmd;
         string          body;//! 数据
     };

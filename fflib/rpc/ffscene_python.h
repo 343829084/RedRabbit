@@ -26,7 +26,7 @@ namespace ff
 
 class ffscene_python_t: public ffscene_t
 {
-    static void py_send_msg_session(const string& session_id_, uint16_t cmd_, const string& data_);
+    static void py_send_msg_session(const userid_t& session_id_, uint16_t cmd_, const string& data_);
     static void py_broadcast_msg_session(uint16_t cmd_, const string& data_);
 public:
     ffscene_python_t();

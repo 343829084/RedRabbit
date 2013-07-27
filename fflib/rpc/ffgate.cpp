@@ -97,7 +97,7 @@ int ffgate_t::handle_broken_impl(socket_ptr_t sock_)
             m_client_set.erase(session_data->id());
         }
     }
-    LOGTRACE((FFGATE, "ffgate_t::broken session_id[%s]", session_data->id()));
+    LOGTRACE((FFGATE, "ffgate_t::broken session_id[%ld]", session_data->id()));
     delete session_data;
     sock_->set_data(NULL);
     sock_->safe_delete();
@@ -151,7 +151,7 @@ int ffgate_t::verify_session_id(const message_t& msg_, socket_ptr_t sock_)
 //! 验证sessionid 的回调函数
 int ffgate_t::verify_session_callback(ffreq_t<session_verify_t::out_t>& req_, socket_ptr_t sock_)
 {
-    LOGTRACE((FFGATE, "ffgate_t::verify_session_callback session_id[%s], err[%s]", req_.arg.session_id, req_.arg.err));
+    LOGTRACE((FFGATE, "ffgate_t::verify_session_callback session_id[%ld], err[%s]", req_.arg.session_id, req_.arg.err));
     set<socket_ptr_t>::iterator it = m_wait_verify_set.find(sock_);
     if (it == m_wait_verify_set.end())
     {
@@ -160,7 +160,7 @@ int ffgate_t::verify_session_callback(ffreq_t<session_verify_t::out_t>& req_, so
     }
     m_wait_verify_set.erase(it);
     
-    if (false == req_.arg.err.empty() || req_.arg.session_id.empty())
+    if (false == req_.arg.err.empty() || req_.arg.session_id == 0)
     {
         sock_->close();
         return 0;
@@ -171,7 +171,7 @@ int ffgate_t::verify_session_callback(ffreq_t<session_verify_t::out_t>& req_, so
     if (client_info.sock)
     {
         client_info.sock->close();
-        LOGINFO((FFGATE, "ffgate_t::verify_session_callback reconnect, close old session_id[%s]", req_.arg.session_id));
+        LOGINFO((FFGATE, "ffgate_t::verify_session_callback reconnect, close old session_id[%ld]", req_.arg.session_id));
     }
     client_info.sock = sock_;
 
@@ -191,9 +191,9 @@ int ffgate_t::verify_session_callback(ffreq_t<session_verify_t::out_t>& req_, so
 }
 
 //! enter scene 回调函数
-int ffgate_t::enter_scene_callback(ffreq_t<session_enter_scene_t::out_t>& req_, const string& session_id_)
+int ffgate_t::enter_scene_callback(ffreq_t<session_enter_scene_t::out_t>& req_, const userid_t& session_id_)
 {
-    LOGTRACE((FFGATE, "ffgate_t::enter_scene_callback session_id[%s]", session_id_));
+    LOGTRACE((FFGATE, "ffgate_t::enter_scene_callback session_id[%ld]", session_id_));
     LOGTRACE((FFGATE, "ffgate_t::enter_scene_callback end ok"));
     return 0;
 }
@@ -202,7 +202,7 @@ int ffgate_t::enter_scene_callback(ffreq_t<session_enter_scene_t::out_t>& req_, 
 int ffgate_t::route_logic_msg(const message_t& msg_, socket_ptr_t sock_)
 {
     session_data_t* session_data = sock_->get_data<session_data_t>();
-    LOGTRACE((FFGATE, "ffgate_t::route_logic_msg session_id[%s]", session_data->id()));
+    LOGTRACE((FFGATE, "ffgate_t::route_logic_msg session_id[%ld]", session_data->id()));
     
     client_info_t& client_info   = m_client_set[session_data->id()];
     if (client_info.request_queue.size() == MAX_MSG_QUEUE_SIZE)
@@ -230,10 +230,10 @@ int ffgate_t::route_logic_msg(const message_t& msg_, socket_ptr_t sock_)
 }
 
 //! 逻辑处理,转发消息到logic service
-int ffgate_t::route_logic_msg_callback(ffreq_t<route_logic_msg_t::out_t>& req_, const string& session_id_, socket_ptr_t sock_)
+int ffgate_t::route_logic_msg_callback(ffreq_t<route_logic_msg_t::out_t>& req_, const userid_t& session_id_, socket_ptr_t sock_)
 {
-    LOGTRACE((FFGATE, "ffgate_t::route_logic_msg_callback session_id[%s]", session_id_));
-    map<string/*sessionid*/, client_info_t>::iterator it = m_client_set.find(session_id_);
+    LOGTRACE((FFGATE, "ffgate_t::route_logic_msg_callback session_id[%ld]", session_id_));
+    map<userid_t/*sessionid*/, client_info_t>::iterator it = m_client_set.find(session_id_);
     if (it == m_client_set.end() || it->second.sock != sock_)
     {
         return 0;
@@ -256,8 +256,8 @@ int ffgate_t::route_logic_msg_callback(ffreq_t<route_logic_msg_t::out_t>& req_, 
 //! 改变处理client 逻辑的对应的节点
 int ffgate_t::change_session_logic(ffreq_t<gate_change_logic_node_t::in_t, gate_change_logic_node_t::out_t>& req_)
 {
-    LOGTRACE((FFGATE, "ffgate_t::change_session_logic session_id[%s]", req_.arg.session_id));
-    map<string/*sessionid*/, client_info_t>::iterator it = m_client_set.find(req_.arg.session_id);
+    LOGTRACE((FFGATE, "ffgate_t::change_session_logic session_id[%ld]", req_.arg.session_id));
+    map<userid_t/*sessionid*/, client_info_t>::iterator it = m_client_set.find(req_.arg.session_id);
     if (it == m_client_set.end())
     {
         return 0;
@@ -284,9 +284,9 @@ int ffgate_t::change_session_logic(ffreq_t<gate_change_logic_node_t::in_t, gate_
 //! 关闭某个session socket
 int ffgate_t::close_session(ffreq_t<gate_close_session_t::in_t, gate_close_session_t::out_t>& req_)
 {
-    LOGTRACE((FFGATE, "ffgate_t::close_session session_id[%s]", req_.arg.session_id));
+    LOGTRACE((FFGATE, "ffgate_t::close_session session_id[%ld]", req_.arg.session_id));
     
-    map<string/*sessionid*/, client_info_t>::iterator it = m_client_set.find(req_.arg.session_id);
+    map<userid_t/*sessionid*/, client_info_t>::iterator it = m_client_set.find(req_.arg.session_id);
     if (it == m_client_set.end())
     {
         return 0;
@@ -305,10 +305,10 @@ int ffgate_t::route_msg_to_session(ffreq_t<gate_route_msg_to_session_t::in_t, ga
     
     for (size_t i = 0; i < req_.arg.session_id.size(); ++i)
     {
-        string& session_id = req_.arg.session_id[i];
-        LOGTRACE((FFGATE, "ffgate_t::route_msg_to_session session_id[%s]", session_id));
+        userid_t& session_id = req_.arg.session_id[i];
+        LOGTRACE((FFGATE, "ffgate_t::route_msg_to_session session_id[%ld]", session_id));
 
-        map<string/*sessionid*/, client_info_t>::iterator it = m_client_set.find(session_id);
+        map<userid_t/*sessionid*/, client_info_t>::iterator it = m_client_set.find(session_id);
         if (it == m_client_set.end())
         {
             continue;
@@ -327,7 +327,7 @@ int ffgate_t::broadcast_msg_to_session(ffreq_t<gate_broadcast_msg_to_session_t::
 {
     LOGTRACE((FFGATE, "ffgate_t::broadcast_msg_to_session begin"));
     
-    map<string/*sessionid*/, client_info_t>::iterator it = m_client_set.begin();
+    map<userid_t/*sessionid*/, client_info_t>::iterator it = m_client_set.begin();
     for (; it != m_client_set.end(); ++it)
     {
         msg_sender_t::send(it->second.sock, req_.arg.cmd, req_.arg.body);

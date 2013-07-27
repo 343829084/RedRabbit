@@ -14,7 +14,7 @@ ffscene_python_t::~ffscene_python_t()
     m_ffpython = NULL;
 }
 
-void ffscene_python_t::py_send_msg_session(const string& session_id_, uint16_t cmd_, const string& data_)
+void ffscene_python_t::py_send_msg_session(const userid_t& session_id_, uint16_t cmd_, const string& data_)
 {
     singleton_t<ffscene_python_t>::instance().send_msg_session(session_id_, cmd_, data_);
 }
@@ -125,7 +125,7 @@ ffslot_t::callback_t* ffscene_python_t::gen_verify_callback()
                                                                                data->ip, data->gate_name);
                 if (ret.size() >= 1)
                 {
-                    data->alloc_session_id = ret[0];
+                    data->alloc_session_id = ::atol(ret[0].c_str());
                 }
                 if (ret.size() >= 2)
                 {
