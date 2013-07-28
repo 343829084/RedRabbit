@@ -1,8 +1,4 @@
-
-def foo():
-    print __name__
-print __name__
-
+# coding=UTF-8
 import traceback
 
 class event_bus_t(object):
@@ -50,36 +46,14 @@ class event_bus_t(object):
         print(self.event_consumer)
 
 event_bus = event_bus_t()
-def get_event_bus():
+def instance():
     return event_bus
 
 def bind_event(event_class_):
     def wraper(func_):
-        ebus = get_event_bus()
+        ebus = instance()
         ebus.bind_event(event_class_, func_)
         return func_
     return wraper
 
-class test_event_t(object):
-    pass
-class test_event2_t(object):
-    pass
-
-
-@bind_event(test_event_t)
-def process_test_event(event_):
-    get_event_bus().post(test_event2_t())
-    print(__name__, 'process_test_event OhNice!!!')
-    get_event_bus().post(test_event2_t())
-@bind_event(test_event2_t)
-def process_test_event2(event_):
-    print(__name__, 'process_test_event2 OhNice!!!', event_)
-
-
-event_bus.dump()
-test_event = test_event_t()
-
-event_bus.post(test_event)
-
-process_test_event2('')
 

@@ -38,7 +38,7 @@ int ffgate_t::open(arg_helper_t& arg_helper)
         return -1;
     }
     
-    if (NULL == net_factory_t::gateway_listen(string("-gate_listen ") + arg_helper.get_option_value("-gate_listen"), this))
+    if (NULL == net_factory_t::gateway_listen(arg_helper, this))
     {
         LOGERROR((FFGATE, "ffgate_t::open failed without -gate_listen"));
         return -1;

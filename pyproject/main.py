@@ -2,6 +2,7 @@
 import os
 import time
 import ffext
+import event_bus
 from  ffpy.MsgDef.ttypes import chat_msg_t
 
 def GetNowTime():
@@ -61,7 +62,7 @@ def process_test(session_id, msg):
                            				  '</font>')
     player = ffext.singleton(player_mgr_t).get(session_id)
     player.inc_chat_times()
-    if player.get_chat_times() > 2:
+    if player.get_chat_times() > 30:
         ffext.close_session(session_id)
 
 
