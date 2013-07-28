@@ -9,6 +9,7 @@ ffbroker_t::ffbroker_t():
     m_master_broker_sock(NULL),
     m_node_id_index(0)
 {
+    m_ffbroker_bridge.set_ffbroker(this);
 }
 ffbroker_t::~ffbroker_t()
 {

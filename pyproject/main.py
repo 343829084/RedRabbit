@@ -24,8 +24,13 @@ class player_mgr_t(object):
 class player_t(object):
     def __init__(self, session_id_):
         self.session_id = session_id_;
+        self.chat_times = 0
     def id():
         return self.session_id
+    def inc_chat_times(self):
+        self.chat_times += 1
+    def get_chat_times(self):
+        return self.chat_times
 
 #这个修饰器的意思是注册process_chat函数接收cmd=1的消息
 @ffext.session_call(1, chat_msg_t)
@@ -45,6 +50,19 @@ def process_chat(session_id, msg):
     ret_msg.value = ret
     ffext.broadcast_msg_session(2, ret_msg)
 
+    player = ffext.singleton(player_mgr_t).get(session_id)
+    player.inc_chat_times()
+    if player.get_chat_times() > 1000:
+        ffext.close_session(session_id)
+
+@ffext.session_call(2)
+def process_test(session_id, msg):
+    ffext.send_msg_session(session_id, 1, '<font color="#ff0000">测试单播接口 cmd=2！'\
+                           				  '</font>')
+    player = ffext.singleton(player_mgr_t).get(session_id)
+    player.inc_chat_times()
+    if player.get_chat_times() > 2:
+        ffext.close_session(session_id)
 
 
 #这个修饰器的意思是注册下面函数处理验证client账号密码，
