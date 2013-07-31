@@ -87,6 +87,7 @@ int db_mgr_t::sync_db_query(long db_id_,const string& sql_, vector<vector<string
     if (0 == db_connection_info->db->exe_sql(sql_, ret_data_, db_connection_info->ret.col_names))
     {
         db_connection_info->ret.ok = true;
+        ret_data_.push_back(db_connection_info->ret.col_names);
     }
     else
     {

@@ -3,9 +3,9 @@ import os
 import time
 import ffext
 import event_bus
-from  ffpy.MsgDef.ttypes import chat_msg_t
+from  msg_def.ttypes import chat_msg_t
 
-from player_mgr import *
+from player_mgr import player_mgr_handler
 
 def GetNowTime():
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
@@ -70,14 +70,14 @@ def process_test(session_id, msg):
 
 #这个修饰器的意思是注册下面函数处理验证client账号密码，
 #session_key为账号密码组合体，client第一个包必为登陆包
-@ffext.session_verify_callback
+#@ffext.session_verify_callback
 def my_session_verify(session_key, online_time, ip, gate_name):
     return [str(ffext.alloc_id())]#需要返回数组，验证成功，第一个元素为分配的id，
 						#第二个元素可以不设置，若设置gate会返回给client，login gate的时候
 						#需要第二个元素返回分配的game gate
 
 #此修饰器的作用是注册下面函数处理用户下线 
-@ffext.session_offline_callback
+#@ffext.session_offline_callback
 def my_session_offline(session_id, online_time):
     content = '<font color="#ff0000">[%s %s] offline </font>'%(session_id, GetNowTime())
     ffext.broadcast_msg_session(1, content)
@@ -86,7 +86,7 @@ def my_session_offline(session_id, online_time):
     ffext.broadcast_msg_session(1, ffext.singleton(player_mgr_t).idlist())
 
 #此修饰器的作用是注册下面函数处理client切换到此场景服务器
-@ffext.session_enter_callback
+#@ffext.session_enter_callback
 def my_session_enter(session_id, from_scene, extra_data):
     #单播接口
     ffext.send_msg_session(session_id, 1, '<font color="#ff0000">测试单播接口！欢迎你！'\
@@ -117,13 +117,17 @@ def sqlite_test():
     ffext.reload('main')#重载此脚本
 
 def mysql_test():
-    db = ffext.ffdb_create('mysql://localhost:3306/root/root/fftest')
-    db.query('CREATE TABLE  IF NOT EXISTS dumy (A int, c float, b varchar(200), primary key (A))')
-    db.query('insert into dumy values(1, 2.3, "ttttTTccc")')
+    db = ffext.ffdb_create('mysql://localhost:3306/root/root/pcgame')
+    #db.query('CREATE TABLE  IF NOT EXISTS dumy (A int, c float, b varchar(200), primary key (A))')
+    #db.query('insert into dumy values(1, 2.3, "ttttTTccc")')
+    sql = "INSERT INTO `player_register` (`NAME` , `PASSWORD`) VALUES('%s', '%s') " % ('TT', 'a')
+    ret = db.sync_query(sql)#cb 为异步回调函数
+    return
     def cb(ret):
         print(ret.flag, ret.result, ret.column, ffext.DB_CALLBACK_DICT)
     db.query('select * from dumy', cb)#cb 为异步回调函数
     ffext.reload('main')#重载此脚本
+
 
 #scene直接可以互相调用
 def test_call_scene():

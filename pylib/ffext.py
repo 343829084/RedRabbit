@@ -45,6 +45,15 @@ def protobuf_to_value(msg_type_, val_):
 g_ReadTMemoryBuffer   = TTransport.TMemoryBuffer()
 g_ReadTBinaryProtocol = TBinaryProtocol.TBinaryProtocol(g_ReadTMemoryBuffer)
 
+def decode_buff(dest, val_):
+    global g_ReadTMemoryBuffer, g_ReadTBinaryProtocol
+    g_ReadTMemoryBuffer.cstringio_buf.truncate()
+    g_ReadTMemoryBuffer.cstringio_buf.seek(0)
+    g_ReadTMemoryBuffer.cstringio_buf.write(val_)
+    g_ReadTMemoryBuffer.cstringio_buf.seek(0)
+    dest.read(g_ReadTBinaryProtocol)
+    return dest
+
 def session_call(cmd_, protocol_type_ = 'json'):
     global g_session_logic_callback_dict
     def session_logic_callback(func_):
@@ -191,12 +200,15 @@ class ffdb_t(object):
         ff.ffscene_obj.db_query(self.db_id, sql_, DB_CALLBACK_ID)
     def sync_query(self, sql_):
         ret = ff.ffscene_obj.sync_db_query(self.db_id, sql_)
-        return query_result_t(True, ret, [])
+        if len(ret) == 0:
+            return query_result_t(False, [], [])
+        col = ret[len(ret) - 1]
+        data = []
+        for k in range(0, len(ret)-1):
+            data.append(ret[k])
+        return query_result_t(True, data, col)
 #封装query返回的结果
 class query_result_t(object):
-    flag   = False
-    result = []
-    column = []
     def __init__(self, flag_, result_, col_):
         self.flag    = flag_
         self.result  = result_
