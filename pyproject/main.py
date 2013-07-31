@@ -5,6 +5,8 @@ import ffext
 import event_bus
 from  ffpy.MsgDef.ttypes import chat_msg_t
 
+from player_mgr import *
+
 def GetNowTime():
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
 

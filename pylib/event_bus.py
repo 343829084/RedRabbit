@@ -50,9 +50,15 @@ def instance():
     return event_bus
 
 def bind_event(event_class_):
+    bind_list = []
+    if event_class_.__class__ == list:
+        bind_list = event_class_
+    else:
+        bind_list.append(event_class_)
     def wraper(func_):
         ebus = instance()
-        ebus.bind_event(event_class_, func_)
+        for k in bind_list:
+            ebus.bind_event(k, func_)
         return func_
     return wraper
 
