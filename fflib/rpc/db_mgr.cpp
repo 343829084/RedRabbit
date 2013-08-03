@@ -108,6 +108,9 @@ void db_mgr_t::db_query_impl(db_connection_info_t* db_connection_info_, const st
     {
         LOGERROR((DB_MGR, "db_mgr_t::db_query failed<%s>, while sql<%s>", db_connection_info_->db->error_msg(), sql_));
     }
-    callback_->exe(&(db_connection_info_->ret));
-    delete callback_;
+    if (callback_)
+    {
+        callback_->exe(&(db_connection_info_->ret));
+        delete callback_;
+    }
 }

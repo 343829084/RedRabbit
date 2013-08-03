@@ -46,7 +46,7 @@ int ffscene_t::close()
 //! 处理client 上线
 int ffscene_t::process_session_verify(ffreq_t<session_verify_t::in_t, session_verify_t::out_t>& req_)
 {
-    LOGTRACE((FFSCENE, "ffscene_t::process_session_verify begin"));
+    LOGTRACE((FFSCENE, "ffscene_t::process_session_verify begin session_key size=%u", req_.arg.session_key.size()));
     session_verify_t::out_t out;
     if (m_callback_info.verify_callback)
     {

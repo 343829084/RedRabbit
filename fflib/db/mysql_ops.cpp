@@ -113,12 +113,20 @@ int  mysql_ops_t::exe_sql(const string& sql_, db_each_row_callback_i* cb_)
     {
         MYSQL_FIELD* column_infos = ::mysql_fetch_fields(res);
         int column_num = ::mysql_num_fields(res);
+        vector<char*> vt_col_name;
+        for (int c = 0; c < column_num; ++ c)
+        {
+            vt_col_name.push_back(column_infos[c].name);
+        }
+        char** pcol_name = &(vt_col_name.front());
+        
+
         int num_row = ::mysql_num_rows(res);
         for (int i= 0; i < num_row; ++i)
         {
             MYSQL_ROW row = ::mysql_fetch_row(res);
             unsigned long* plen = ::mysql_fetch_lengths(res);
-            cb_->callback(column_num, row, (char**)column_infos, (long*)plen);
+            cb_->callback(column_num, row, (char**)pcol_name, (long*)plen);
         }
         ::mysql_free_result(res);
         res = NULL;

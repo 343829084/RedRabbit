@@ -128,7 +128,7 @@ int ffgate_t::handle_msg_impl(const message_t& msg_, socket_ptr_t sock_)
 int ffgate_t::verify_session_id(const message_t& msg_, socket_ptr_t sock_)
 {
     string ip = socket_op_t::getpeername(sock_->socket());
-    LOGTRACE((FFGATE, "ffgate_t::verify_session_id session_key[%s], ip[%s]", msg_.get_body(), ip));
+    LOGTRACE((FFGATE, "ffgate_t::verify_session_id session_key len=%u, ip[%s]", msg_.get_body().size(), ip));
     if (ip.empty())
     {
         sock_->close();

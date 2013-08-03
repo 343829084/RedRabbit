@@ -36,7 +36,8 @@ public:
             (*m_col_name).resize(col_num_);
             for (int i = 0; i < col_num_; ++i)
             {
-                (*m_col_name)[i].assign(col_names_[i]);
+                if (col_names_[i])
+                    (*m_col_name)[i].assign(col_names_[i]);
             }
         }
     }

@@ -17,19 +17,19 @@ class player_mgr_t:
 class player_t:
     def __init__(self, session_id_ = 0):
         self.session_id = session_id_;
-        self.chat_times = 0
+        self.real_name  = ''
         self.nick_name  = ''
-        self.password   = ''
+        self.email      = ''
+        self.level      = 0
+        self.exp        = 0
         self.extra_data = ''
         self.online_time = 0
         self.ip         = ''
         self.gate_name  = ''
-    def id():
+    def id(self):
         return self.session_id
-    def set_id(id_):
+    def set_id(self, id_):
         self.session_id = id_
-    def inc_chat_times(self):
-        self.chat_times += 1
-    def get_chat_times(self):
-        return self.chat_times
+    def get_extra_data(self):
+        return ''
 

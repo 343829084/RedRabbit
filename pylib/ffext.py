@@ -213,13 +213,15 @@ class query_result_t(object):
         self.flag    = flag_
         self.result  = result_
         self.column  = col_
+    def dump(self):
+        print(self.flag, self.result, self.column)
 
 #C++ 异步执行完毕db操作回调
 def ff_db_query_callback(callback_id_, flag_, result_, col_):
     global DB_CALLBACK_DICT
     cb = DB_CALLBACK_DICT.get(callback_id_)
     del DB_CALLBACK_DICT[callback_id_]
-    print('db_query_callback', callback_id_, flag_, result_, col_)
+    #print('db_query_callback', callback_id_, flag_, result_, col_)
     if cb != None:
         ret = query_result_t(flag_, result_, col_)
         cb(ret)
@@ -337,4 +339,7 @@ def LOGWARN(mod_, content_):
 def LOGERROR(mod_, content_):
     return ff.ffscene_obj.pylog(2, mod_, content_)
 def LOGFATAL(mod_, content_):
-    return ff.ffscene_obj.pylog(2, mod_, content_)
+    return ff.ffscene_obj.pylog(1, mod_, content_)
+
+def ERROR(content_):
+    return LOGERROR('PY', content_)
