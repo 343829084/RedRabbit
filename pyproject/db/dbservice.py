@@ -25,7 +25,7 @@ def format_player_table(player):
     return 'player0'
 
 def register_player(player):
-    sql = "INSERT INTO `player_register` (`NAME` , `PASSWORD`) VALUES('%s', '%s') " % (player.nick_name, player.password)
+    sql = "INSERT INTO `player_register` (`NAME` , `PASSWORD`) VALUES ('%s', '%s') " % (player.nick_name, player.password)
     ret = get_sync_db().sync_query(sql)
     if ret.flag == False:
         print('账号已存在，注册失败:%s'%(sql))
@@ -35,7 +35,7 @@ def register_player(player):
 
 
 def init_player_db(player):
-    sql = "INSERT INTO `%s` (`ID`, `REAL_NAME` , `NICK_NAME`, `EMAIL`, `LEVEL`, `EXP`, `EXTRA_DATA`) VALUES('%s', '%s', '%s', '%s', '%d', '%d', '%s') "\
+    sql = "INSERT INTO `%s` (`ID`, `REAL_NAME` , `NICK_NAME`, `EMAIL`, `LEVEL`, `EXP`, `EXTRA_DATA`) VALUES ('%s', '%s', '%s', '%s', '%d', '%d', '%s') "\
           ""% (format_player_table(player), player.id(), player.real_name, player.nick_name, player.email, player.level, player.exp, player.get_extra_data())
     ret = get_sync_db().sync_query(sql)
     if ret.flag == False:
